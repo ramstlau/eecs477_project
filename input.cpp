@@ -7,11 +7,26 @@
 using namespace std;
 
 struct HittingSetData {
+  // Problem Data
   int num_antennas, num_base_stations;
   vector<vector<int> > antennas;
+  vector<int> base_stations; // value is the # of antennas covering this station
+
+  // Solution Data
+  set<int> sol_antennas;
+  int num_base_stations_covered;
+
+  // Methods
+  HittingSetData() {
+    num_base_stations_covered = 0;
+  }
+  void readData(string filename);
+  void addAntenna(int i);
+  void removeAntenna(int i);
+  void printSolution();
 };
 
-HittingSetData readData(string filename) {
+void HittingSetData::readData(string filename) {
   std::cout.sync_with_stdio(false);
   ifstream fin;
   fin.open(filename);
@@ -20,28 +35,62 @@ HittingSetData readData(string filename) {
   }
 
   HittingSetData data;
-  fin >> data.num_antennas >> data.num_base_stations;
-  data.antennas.reserve(data.num_antennas);
+  fin >> num_antennas >> num_base_stations;
+  antennas.reserve(num_antennas);
+  base_stations.resize(num_base_stations, 0);
 
+  // Setup antennas
   string line;
   while (getline(fin, line)) {
     std::istringstream is(line);
-    data.antennas.push_back( 
+    antennas.push_back( 
       std::vector<int>( std::istream_iterator<int>(is), 
         std::istream_iterator<int>()
       ) 
     );
-   }
+  }
+}
 
-  return data;
+void HittingSetData::addAntenna(int i) {
+  if (sol_antennas.emplace(i).second) {
+    for (int &b : antennas[i]) {
+      if (base_stations[b]++ == 1) {
+        num_base_stations_covered--;
+      }
+      if (base_stations[b] == 1) {
+        num_base_stations_covered++;
+      }
+    }
+  }
+}
+void HittingSetData::removeAntenna(int i) {
+  sol_antennas.erase(i);
+  for (int &b : antennas[i]) {
+    if (base_stations[b]-- == 1) {
+      num_base_stations_covered--;
+    }
+    if (base_stations[b] == 1) {
+      num_base_stations_covered++;
+    }
+  }
+}
+
+void HittingSetData::printSolution() {
+  cout << sol_antennas.size();
+  auto it=sol_antennas.begin();
+  while (it != sol_antennas.end()) {
+    cout << " " << *it++;
+  }
+  cout << endl << num_base_stations_covered << endl;
 }
 
 int main() {
-  HittingSetData data = readData("test4.dat");
-  for (vector<int> & v : data.antennas) {
-    for (int & i : v) {
-      cout << i << ' ';
-    }
-    cout << endl;
-  }
+  HittingSetData data;
+  data.readData("test4.dat");
+  data.addAntenna(1);
+  data.addAntenna(2);
+  data.printSolution();
+  data.addAntenna(8);
+  data.removeAntenna(8);
+  data.printSolution();
 }
