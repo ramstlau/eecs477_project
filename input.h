@@ -13,4 +13,3 @@ class HittingSetData {
   	void printData();
 };
 
-//HittingSetData readData(string filename);

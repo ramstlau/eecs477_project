@@ -20,7 +20,7 @@ void HittingSetData::readData(string filename) {
   fin >> num_antennas >> num_base_stations;
   antennas.reserve(num_antennas);
   antennas.resize(num_antennas);
-  cout << "vector size " << antennas.size() << endl;
+  //cout << "vector size " << antennas.size() << endl;
 
   string line;
   ostringstream is;
@@ -60,9 +60,9 @@ void HittingSetData::readData(string filename) {
 
 }
 void HittingSetData::printData() {
-  cout << "Dimensions: " << antennas.size() << endl;
+  //cout << "Dimensions: " << antennas.size() << endl;
   for (unsigned int i = 0; i < antennas.size(); i++) {
-  	cout << "loop: ";
+  //	cout << "loop: ";
     for (unsigned int j = 0; j < antennas.at(i).size(); j++) {
       cout << antennas.at(i).at(j) << ' ';
     }
