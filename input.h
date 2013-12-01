@@ -9,7 +9,7 @@ class HittingSetData {
   	vector<vector<int> > antennas;
   	
   	HittingSetData();
-  	void readData(string filename);
+  	void readData();
   	void printData();
 };
 
