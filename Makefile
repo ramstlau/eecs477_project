@@ -10,7 +10,7 @@ CC = g++
 
 CFLAGS= -Wall -Werror -std=c++11
 
-OBJS = input.o bruteforce.o
+OBJS = input.o greedy1.o
 
 PROG = solver
 
@@ -27,4 +27,7 @@ input.o: input.cpp
 
 bruteforce.o: input.h bruteforce.cpp
 	$(CC) $(CFLAGS) -c bruteforce.cpp
+	
+greedy1.o: input.h greedy1.cpp
+	$(CC) $(CFLAGS) -c greedy1.cpp
 

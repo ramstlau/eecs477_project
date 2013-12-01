@@ -2,11 +2,16 @@
 #include <string>
 using namespace std;
 
+struct Antenna {
+	int num;
+	vector<int> base_stations;
+};
+
 class HittingSetData {
 
 	public:
   	int num_antennas, num_base_stations;
-  	vector<vector<int> > antennas;
+  	vector<Antenna> antennas;
   	
   	HittingSetData();
   	void readData();
