@@ -10,7 +10,7 @@ CC = g++
 
 CFLAGS= -Wall -Werror -std=c++11 -g
 
-OBJS = input.o greedy1.o greedy2.o
+OBJS = input.o greedy1.o greedy2.o driver.o
 
 PROG = solver
 
@@ -33,4 +33,7 @@ greedy1.o: input.h greedy1.cpp
 
 greedy2.o: input.h greedy1.h greedy2.cpp
 	$(CC) $(CFLAGS) -c greedy2.cpp
+
+driver.o: driver.cpp
+	$(CC) $(CFLAGS) -c driver.cpp
 

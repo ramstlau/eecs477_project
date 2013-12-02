@@ -5,8 +5,6 @@
 #include <iostream>
 #include <cassert>
 
-using namespace std;
-
 bool compare2(Base_Station *b1, Base_Station *b2)
 {
 	return(b1->coverage.size() < b2->coverage.size());
@@ -127,23 +125,23 @@ void greedy2(HittingSetData &data, vector<int> &set_antenna, int &num_covered_ba
 	num_covered_base_stations = onecovered.size();
 
 }
-int main(int argc, char *argv[])
-{
+//int main(int argc, char *argv[])
+//{
 	
-	HittingSetData data;
-	data.readData();
-	cout << "data.num_antennas " << data.num_antennas << endl;
-	vector<int> set_antenna;
-	int num_covered_base_stations = 0;
+	//HittingSetData data;
+	//data.readData();
+	//cout << "data.num_antennas " << data.num_antennas << endl;
+	//vector<int> set_antenna;
+	//int num_covered_base_stations = 0;
 
-	//data.printBaseStations();
+	////data.printBaseStations();
 	
-	greedy2(data, set_antenna, num_covered_base_stations);
+	//greedy2(data, set_antenna, num_covered_base_stations);
 	
 
-	printVector(set_antenna);
-	cout << num_covered_base_stations << endl;
-	  
+	//printVector(set_antenna);
+	//cout << num_covered_base_stations << endl;
+		
 
-	return 0;
-}
+	//return 0;
+//}
