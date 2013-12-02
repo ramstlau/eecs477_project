@@ -21,39 +21,28 @@ void printVector(vector<int> &v)
 	  cout << endl;
 
 }
-
-bool profitable(HittingSetData &data, int setNum, vector<int> &covered, vector<int> &onecovered, vector<int> &dc)
+double profitable_calculate(HittingSetData &data, int setNum, vector<int> &covered, vector<int> &onecovered, vector<int> &dc, vector<int> &existingdc, vector<int> &adddc)
 {
-	bool ret = false;
-	//calculate intersection between old dc and data set, existingdc
-	vector<int> existingdc(data.num_base_stations);
-       	vector<int>::iterator it2 = set_intersection(dc.begin(), dc.end(), 
+	vector<int>::iterator it2 = set_intersection(dc.begin(), dc.end(), 
 			      data.antennas.at(setNum).base_stations.begin(), data.antennas.at(setNum).base_stations.end(),
 			      existingdc.begin());
  	existingdc.erase(it2, existingdc.end()); 
  	
- 	//cout << "Set number : " << setNum << endl;
- 	//cout << "existingdc : ";
- 	//printVector(existingdc);
- 	
-	//calculate intersection between, old onecovered and data set, newdc
-       	vector<int> adddc(data.num_base_stations);
-       	it2 = set_intersection(onecovered.begin(), onecovered.end(), 
+ 	it2 = set_intersection(onecovered.begin(), onecovered.end(), 
 			       data.antennas.at(setNum).base_stations.begin(), data.antennas.at(setNum).base_stations.end(),
 			 				    adddc.begin());
  	adddc.erase(it2, adddc.end()); //this should be put into dc
  	
- 	//cout << "adddc : ";
- 	//printVector(adddc);
- 	
  	double p = (double)(existingdc.size() + adddc.size())/(double)data.antennas.at(setNum).base_stations.size();
- 	//cout << "p is : " << p << endl;
- 	if(p < 0.5) //update covered, onecovered, dc
- 	  {
-		ret = true;
+ 	
+ 	return p;
+
+}
+void profitable_add(HittingSetData &data, int setNum, vector<int> &covered, vector<int> &onecovered, vector<int> &dc, vector<int> &existingdc, vector<int> &adddc)
+{
 		//update dc, TODO: this could alternatively be a push_back + for loop operation
 		vector<int>newdc(data.num_base_stations);
-		it2 = set_union(dc.begin(), dc.end(), adddc.begin(), adddc.end(), newdc.begin());
+		vector<int>::iterator it2 = set_union(dc.begin(), dc.end(), adddc.begin(), adddc.end(), newdc.begin());
 		newdc.erase(it2, newdc.end());	
 
 	
@@ -83,14 +72,23 @@ bool profitable(HittingSetData &data, int setNum, vector<int> &covered, vector<i
        		newcovered.erase(it2, newcovered.end());
        		
        		dc.swap(newdc);
-		//cout << "updated dc : ";
-		//printVector(dc);
        		covered.swap(newcovered);
        		onecovered.swap(newonecovered);
-       		//cout << "updated onecovered : ";
-       		//printVector(onecovered);
-       		//cout << "updated covered : ";
-       		//printVector(covered);
+}
+bool profitable(HittingSetData &data, int setNum, vector<int> &covered, vector<int> &onecovered, vector<int> &dc)
+{
+	bool ret = false;
+	//calculate intersection between old dc and data set, existingdc
+	vector<int> existingdc(data.num_base_stations);
+ 	
+	//calculate intersection between, old onecovered and data set, newdc
+       	vector<int> adddc(data.num_base_stations);
+
+ 	double p = profitable_calculate(data, setNum, covered, onecovered, dc, existingdc, adddc);
+ 	if(p < 0.5) //update covered, onecovered, dc
+ 	  {
+		ret = true;
+		profitable_add(data, setNum, covered, onecovered, dc, existingdc, adddc);
 	  }				   
 
 	return ret;
@@ -139,7 +137,7 @@ void greedy1(HittingSetData &data, vector<int> &set_antenna, int &num_covered_ba
 	num_covered_base_stations = onecovered.size();
 
 }
-int main(int argc, char *argv[])
+/*int main(int argc, char *argv[])
 {
 	
 	HittingSetData data;
@@ -156,4 +154,4 @@ int main(int argc, char *argv[])
 	  
 
 	return 0;
-}
+}*/

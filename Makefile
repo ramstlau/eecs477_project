@@ -8,9 +8,9 @@ LD_RUN_PATH := /usr/um/gcc-4.7.0/lib64
 
 CC = g++
 
-CFLAGS= -Wall -Werror -std=c++11
+CFLAGS= -Wall -Werror -std=c++11 -g
 
-OBJS = input.o greedy1.o
+OBJS = input.o greedy1.o greedy2.o
 
 PROG = solver
 
@@ -30,4 +30,7 @@ bruteforce.o: input.h bruteforce.cpp
 	
 greedy1.o: input.h greedy1.cpp
 	$(CC) $(CFLAGS) -c greedy1.cpp
+
+greedy2.o: input.h greedy1.h greedy2.cpp
+	$(CC) $(CFLAGS) -c greedy2.cpp
 

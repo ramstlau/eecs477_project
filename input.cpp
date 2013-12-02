@@ -16,6 +16,7 @@ void HittingSetData::readData() {
 
   antennas.reserve(num_antennas);
   antennas.resize(num_antennas);
+  base_stations.resize(num_base_stations);
 
   string line;
   ostringstream is;
@@ -36,7 +37,9 @@ void HittingSetData::readData() {
             is.str(string());
             continue;
           }
-          antennas.at(i).base_stations.push_back(atoi(is.str().c_str()));
+          int bsNum = atoi(is.str().c_str());
+          antennas.at(i).base_stations.push_back(bsNum);
+          base_stations.at(bsNum).coverage.push_back(i);
           is.str(string());
         }
       }
@@ -44,7 +47,9 @@ void HittingSetData::readData() {
        is << c;
     }
     if(!is.str().empty()) {
-      antennas.at(i).base_stations.push_back(atoi(is.str().c_str()));
+      int bsNum = atoi(is.str().c_str());
+      antennas.at(i).base_stations.push_back(bsNum);
+      base_stations.at(bsNum).coverage.push_back(i);
       is.str(string());
     }
     
@@ -52,8 +57,15 @@ void HittingSetData::readData() {
    
    }
    
+   //initialize base station nums
+   for(unsigned int k = 0; k < base_stations.size(); k++)
+     {
+       base_stations.at(k).num = k;
+     }
 
-
+   //initialize vector bool
+   covered.resize(num_base_stations, false);
+   
 }
 void HittingSetData::printData() {
   
@@ -65,5 +77,15 @@ void HittingSetData::printData() {
     cout << endl;
    }
 
+
+}
+void HittingSetData::printBaseStations(){
+
+  for (unsigned int i = 0; i < base_stations.size(); i++) {
+    for (unsigned int j = 0; j < base_stations.at(i).coverage.size(); j++) {
+      cout << base_stations.at(i).coverage.at(j) << ' ';
+    }
+    cout << endl;
+   }
 
 }
