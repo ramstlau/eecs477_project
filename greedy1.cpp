@@ -23,15 +23,17 @@ void printVector(vector<int> &v)
 }
 double profitable_calculate(HittingSetData &data, int setNum, vector<int> &covered, vector<int> &onecovered, vector<int> &dc, vector<int> &existingdc, vector<int> &adddc)
 {
+	//cout << "existingdc calculation begins: " << endl;
 	vector<int>::iterator it2 = set_intersection(dc.begin(), dc.end(), 
 			      data.antennas.at(setNum).base_stations.begin(), data.antennas.at(setNum).base_stations.end(),
 			      existingdc.begin());
  	existingdc.erase(it2, existingdc.end()); 
- 	
+ 	//cout << "existingdc calculation ends, and addc calculation begins " << endl;
  	it2 = set_intersection(onecovered.begin(), onecovered.end(), 
 			       data.antennas.at(setNum).base_stations.begin(), data.antennas.at(setNum).base_stations.end(),
 			 				    adddc.begin());
  	adddc.erase(it2, adddc.end()); //this should be put into dc
+ 	//cout << "addc calculation ends" << endl;
  	
  	double p = (double)(existingdc.size() + adddc.size())/(double)data.antennas.at(setNum).base_stations.size();
  	
@@ -137,21 +139,3 @@ void greedy1(HittingSetData &data, vector<int> &set_antenna, int &num_covered_ba
 	num_covered_base_stations = onecovered.size();
 
 }
-/*int main(int argc, char *argv[])
-{
-	
-	HittingSetData data;
-	data.readData();
-	cout << "data.num_antennas " << data.num_antennas << endl;
-	vector<int> set_antenna;
-	int num_covered_base_stations = 0;
-
-	greedy1(data, set_antenna, num_covered_base_stations);
-	
-
-	printVector(set_antenna);
-	cout << num_covered_base_stations << endl;
-	  
-
-	return 0;
-}*/

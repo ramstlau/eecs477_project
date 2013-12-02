@@ -16,11 +16,14 @@ int assess_profit(HittingSetData &data, int bs_num, vector<int> &covered, vector
 	double p_min = 0.5;
 	vector<int> edc_min(data.num_base_stations), adc_min(data.num_base_stations);
 	//cout << "asses_profit called with: " << bs_num << " " << covered.size() << " " << onecovered.size() << " " << dc.size() << endl;
-	for(unsigned int i = 0; i < data.base_stations.at(bs_num).coverage.size(); i++)					//asses_profit function: selects antenna & returns it
+	for(unsigned int i = 0; i < data.base_stations.at(bs_num).coverage.size(); i++)					
+	//asses_profit function: selects antenna & returns it
 	  {
 	    //return p number.  store min p number and associated antenna.
 	    //cout << "LOOP" << endl;
-	    vector<int> edc(edc_min), adc(adc_min);
+	    if(data.selected_antennas.find(data.base_stations.at(bs_num).coverage.at(i)) != data.selected_antennas.end())
+	      continue;
+	    vector<int> edc(data.num_base_stations), adc(data.num_base_stations);
 	    //cout << "data.base_stations.at(bs_num).coverage.at(i) " << data.base_stations.at(bs_num).coverage.at(i) << endl;
 	    double p = profitable_calculate(data, data.base_stations.at(bs_num).coverage.at(i), covered, onecovered, dc, edc, adc);
 	    //cout << " finished profitable_calculate  p is" << p << endl;
@@ -96,7 +99,7 @@ void greedy2(HittingSetData &data, vector<int> &set_antenna, int &num_covered_ba
 	markCovered(data, selected);
 	
 	set_antenna.push_back(selected);
-	data.selected_antennas[selected] = true;
+	data.selected_antennas.insert(selected);
 
 	//cout << "FINISHED WITH FIRST SELECTION" << endl;
 	
@@ -112,10 +115,11 @@ void greedy2(HittingSetData &data, vector<int> &set_antenna, int &num_covered_ba
 	      	//cout << " not covered" << endl;
 	      		//assess_profit
 	      	selected = assess_profit(data, sorted_range.at(i)->num, covered, onecovered, dc);
+	      	//cout << "selectd is " << selected << endl;
 	      	if(selected == -1)
 	      	  continue;
 	      	set_antenna.push_back(selected);
-	      	data.selected_antennas[selected] = true;
+	      	data.selected_antennas.insert(selected);
 	      	//data.covered.at(sorted_range.at(i)->num) = true;
 	      	markCovered(data, selected);
 	      }
@@ -125,23 +129,3 @@ void greedy2(HittingSetData &data, vector<int> &set_antenna, int &num_covered_ba
 	num_covered_base_stations = onecovered.size();
 
 }
-//int main(int argc, char *argv[])
-//{
-	
-	//HittingSetData data;
-	//data.readData();
-	//cout << "data.num_antennas " << data.num_antennas << endl;
-	//vector<int> set_antenna;
-	//int num_covered_base_stations = 0;
-
-	////data.printBaseStations();
-	
-	//greedy2(data, set_antenna, num_covered_base_stations);
-	
-
-	//printVector(set_antenna);
-	//cout << num_covered_base_stations << endl;
-		
-
-	//return 0;
-//}

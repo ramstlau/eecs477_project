@@ -25,6 +25,9 @@ clean:
 input.o: input.cpp
 	$(CC) $(CFLAGS) -c input.cpp
 
+main.o: input.h greedy1.h greedy2.h main.cpp
+	$(CC) $(CFLAGS) -c main.cpp
+
 bruteforce.o: input.h bruteforce.cpp
 	$(CC) $(CFLAGS) -c bruteforce.cpp
 	

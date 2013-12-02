@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include <unordered_map>
+#include <unordered_set>
 using namespace std;
 
 struct Antenna {
@@ -25,7 +25,7 @@ class HittingSetData {
 
   	vector<bool> covered;
   	vector<Base_Station> base_stations;	//used for sorting 
-  	unordered_map<int, bool> selected_antennas;
+  	unordered_set<int> selected_antennas;
   	
   	HittingSetData();
   	void readData();
