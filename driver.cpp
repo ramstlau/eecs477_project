@@ -1,6 +1,7 @@
 #include "input.h"
 #include "greedy1.h"
 #include "greedy2.h" 
+#include "bruteforce2.h"
 #include <iostream>
 #include <ctime>
 #include <utility>
@@ -27,18 +28,17 @@ int main(int argc, char *argv[])
   
 
   // Single solver
-  //clock_t algo_begin = clock();
-  //Solver greedy_1 = &greedy1;
-  //single_algo(data, set_antenna, num_covered_base_stations, greedy_1);
-  //clock_t algo_end = clock();
-  //print_time(algo_begin, algo_end, "Algorithm"); 
+  clock_t algo_begin = clock();
+  Solver solver = &bruteforce2;
+  single_algo(data, set_antenna, num_covered_base_stations, solver);
+  clock_t algo_end = clock();
+  print_time(algo_begin, algo_end, "Algorithm"); 
 
   // All solvers
-  vector<pair<string, Solver> > solvers;
-  solvers.push_back(make_pair<string, Solver>("Greedy 1", &greedy1));
-  solvers.push_back(make_pair<string, Solver>("Greedy 2", &greedy2));
-  solvers.push_back(make_pair<string, Solver>("Greedy 2", &greedy2));
-  all_algos(data, set_antenna, num_covered_base_stations, solvers);
+  //vector<pair<string, Solver> > solvers;
+  //solvers.push_back(make_pair<string, Solver>("Greedy 1", &greedy1));
+  //solvers.push_back(make_pair<string, Solver>("Greedy 2", &greedy2));
+  //all_algos(data, set_antenna, num_covered_base_stations, solvers);
   
   
   clock_t end = clock();

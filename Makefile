@@ -15,6 +15,9 @@ OBJS = input.o greedy1.o greedy2.o driver.o
 PROG = solver
 
 all: $(PROG)
+
+bruteforce: bruteforce.o
+	$(CC) bruteforce.o $(CFLAGS) -o $(PROG)
 	
 $(PROG): $(OBJS)
 	$(CC) $(OBJS) $(CFLAGS) -o $(PROG)
