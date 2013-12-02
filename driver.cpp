@@ -3,12 +3,18 @@
 #include "greedy2.h" 
 #include <iostream>
 #include <ctime>
+#include <utility>
+
+typedef void (*Solver)(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations);
 
 void print_time(const clock_t &begin, const clock_t &end, string period_name);
+void single_algo(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations, Solver solver);
+void all_algos(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations, vector<pair<string, Solver> > solvers);
 
 int main(int argc, char *argv[])
 {
         
+  clock_t begin = clock();
   clock_t input_begin = clock();
   HittingSetData data;
   data.readData();
@@ -19,20 +25,54 @@ int main(int argc, char *argv[])
   clock_t input_end = clock();
   print_time(input_begin, input_end, "Input"); 
   
-  clock_t algo_begin = clock();
-  greedy1(data, set_antenna, num_covered_base_stations);
-  clock_t algo_end = clock();
-  print_time(algo_begin, algo_end, "Algorithm"); 
+
+  // Single solver
+  //clock_t algo_begin = clock();
+  //Solver greedy_1 = &greedy1;
+  //single_algo(data, set_antenna, num_covered_base_stations, greedy_1);
+  //clock_t algo_end = clock();
+  //print_time(algo_begin, algo_end, "Algorithm"); 
+
+  // All solvers
+  vector<pair<string, Solver> > solvers;
+  solvers.push_back(make_pair<string, Solver>("Greedy 1", &greedy1));
+  solvers.push_back(make_pair<string, Solver>("Greedy 2", &greedy2));
+  solvers.push_back(make_pair<string, Solver>("Greedy 2", &greedy2));
+  all_algos(data, set_antenna, num_covered_base_stations, solvers);
   
+  
+  clock_t end = clock();
+  print_time(begin, end, "Total Program"); 
+
+  return 0;
+}
+
+void single_algo(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations, Solver solver) {
+
+  solver(data, set_antenna, num_covered_base_stations);
+
   clock_t output_begin = clock();
   printVector(set_antenna);
   cout << num_covered_base_stations << endl;
   clock_t output_end = clock();
   print_time(output_begin, output_end, "Output"); 
+}
 
-  print_time(input_begin, output_end, "Total Program"); 
+void all_algos(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations, vector<pair<string, Solver> > solvers) {
 
-  return 0;
+  clock_t algo_begin, algo_end;
+  for(pair<string, Solver> &p : solvers) {
+    string solver_name = p.first;
+    Solver solver = p.second;
+
+    algo_begin = clock(); 
+    solver(data, set_antenna, num_covered_base_stations);
+    algo_end = clock();
+
+    print_time(algo_begin, algo_end, solver_name);
+    printVector(set_antenna);
+    cout << num_covered_base_stations << endl << endl;
+  }
 }
 
 void print_time(const clock_t &begin, const clock_t &end, string period_name) {
