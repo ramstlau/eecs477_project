@@ -1,0 +1,13 @@
+Greedy1:
+  1. Sort antennas based on cardinality of base stations it covers (high -> low)
+  2. Select the highest one
+  3. Walk through sorted range from step one, adding an antenna if it is profitable:
+        Profitable: calculate for this antenna |# of base stations in this that don't receive signal upon adding this|/|# of total base stations that this covers|.
+                    Adding this is a profit if the division above is below 0.5. 
+
+Greedy2:
+  1. Sort base stations based on cardinality of antennas that cover it (low -> high)
+  2. Select the lowest base station, select an antenna that covers it, mark all base stations that it covers as covered.
+  3. Walk through sorted range from step one, if the base station is not covered yet, add the most profitable antenna that covers it.
+        Profitable: calculate for this antenna |# of base stations in this that don't receive signal upon adding this|/|# of total base stations that this covers|.
+                    Adding this is a profit if the division above is below 0.5. 
