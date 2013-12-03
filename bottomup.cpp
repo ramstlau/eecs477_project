@@ -13,30 +13,9 @@ int get_delta(vector<int> &base_stations, int i, vector<int> *src);
 void update_coverage(
     vector<int> *&src, 
     vector<int> *&dest, 
+    vector<int> &doubly_counted, 
     vector<int> &base_stations);
 
-void bottomup_int_input(
-    HittingSetData &data, 
-    vector<int> &set_antenna, // continues from this set
-    int &num_covered_base_stations)
-{
-  // INT -> BOOL
-  vector<bool> converted(data.num_antennas, false);
-  for(int &i : set_antenna) {
-    converted[i] = true;
-  }
-
-  // ALGO
-  bottomup(data, converted, num_covered_base_stations);
-
-  // BOOL -> INT
-  set_antenna.clear();
-  for(int i=0; i<converted.size(); i++) {
-    if (converted[i]) {
-      set_antenna.push_back(i);
-    }
-  }
-}
 void bottomup(
     HittingSetData &data, 
     vector<bool> &set_antenna, // continues from this set
@@ -51,11 +30,12 @@ void bottomup(
   // Build coverage map
   vector<int> single_covering_1;
   vector<int> single_covering_2;
+  vector<int> doubly_counted;
   vector<int> *src = &single_covering_1;
   vector<int> *dest = &single_covering_2;
   for(int i=0; i<set_antenna.size(); i++) {
     if (set_antenna[i]) {
-      update_coverage(src, dest, data.antennas[i].base_stations);
+      update_coverage(src, dest, doubly_counted, data.antennas[i].base_stations);
     }
   }
 
@@ -77,7 +57,7 @@ void bottomup(
       // update set & increment creation_stamper
       creation_stamper++;
       set_antenna[current.antenna] = true; 
-      update_coverage(src, dest, data.antennas[current.antenna].base_stations);
+      update_coverage(src, dest, doubly_counted, data.antennas[current.antenna].base_stations);
       // update validity table
       //cout << "updating validity table to " << creation_stamper << endl;
       for(int &i : data.antennas[current.antenna].base_stations) {
@@ -106,29 +86,74 @@ void bottomup(
   num_covered_base_stations = src->size();
 }
 
+void bottomup_int_input(
+    HittingSetData &data, 
+    vector<int> &set_antenna, // continues from this set
+    int &num_covered_base_stations)
+{
+  // INT -> BOOL
+  vector<bool> converted(data.num_antennas, false);
+  for(int &i : set_antenna) {
+    converted[i] = true;
+  }
+
+  // ALGO
+  bottomup(data, converted, num_covered_base_stations);
+
+  // BOOL -> INT
+  set_antenna.clear();
+  for(int i=0; i<converted.size(); i++) {
+    if (converted[i]) {
+      set_antenna.push_back(i);
+    }
+  }
+}
 
 void update_coverage(
     vector<int> *&src, 
-    vector<int> *&dest, 
+    vector<int> *&dest,
+    vector<int> &doubly_counted, 
     vector<int> &base_stations)
 {
-  // TODO TODO TODO: Add a doubly covered list
-
-  //cout << "UPDATE:" << endl;
-  //cout << "src: " << src->size() << endl;
-  //cout << "dest: " << dest->size() << endl;
-
-  set_symmetric_difference(
-      src->begin(), 
-      src->end(), 
+  cout << "UPDATE:" << endl;
+  cout << "src: " << src->size() << endl;
+  cout << "dest: " << dest->size() << endl;
+  cout << "stations: " << base_stations.size() << endl;
+  
+  // remove all known doubly_covereds from base_stations
+  vector<int> base_stations_not_dc;
+  set_difference(
       base_stations.begin(), 
       base_stations.end(), 
+      doubly_counted.begin(), 
+      doubly_counted.end(), 
+      back_inserter(base_stations_not_dc));
+  cout << "non-dc stations: " << base_stations_not_dc.size() << endl;
+
+  // add new double counts to doubly_counted
+  // no need to remove from base_stations_not_dc, symmetric difference will remove
+  set_intersection(
+      src->begin(), 
+      src->end(), 
+      base_stations_not_dc.begin(), 
+      base_stations_not_dc.end(), 
+      back_inserter(doubly_counted));
+  cout << "new dc: " << doubly_counted.size() << endl;
+
+  set_symmetric_difference( // still need symmetric difference instead of union
+                            // because new dc's weren't removed from base_stations
+      src->begin(), 
+      src->end(), 
+      base_stations_not_dc.begin(), 
+      base_stations_not_dc.end(), 
       back_inserter(*dest));
+
   src->clear();
   swap(src, dest); 
-  //cout << "AFTER:" << endl;
-  //cout << "src: " << src->size() << endl;
-  //cout << "dest: " << dest->size() << endl;
+
+  cout << "AFTER:" << endl;
+  cout << "src: " << src->size() << endl;
+  cout << "dest: " << dest->size() << endl;
 }
 
 int get_delta(vector<int> &base_stations, int i, vector<int> *src)
