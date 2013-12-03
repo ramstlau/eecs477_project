@@ -30,7 +30,8 @@ int main(int argc, char *argv[])
 
   // Single solver
   clock_t algo_begin = clock();
-  Solver solver = &bottomup_int_input;
+  //Solver solver = &bottomup_int_input;
+  Solver solver = &bruteforce2;
   single_algo(data, set_antenna, num_covered_base_stations, solver);
   clock_t algo_end = clock();
   print_time(algo_begin, algo_end, "Algorithm"); 

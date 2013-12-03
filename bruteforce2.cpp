@@ -67,26 +67,42 @@ int eval(const HittingSetData &data, const vector<bool> &selection) {
   vector<int> single_covering_2;
   vector<int> *src = &single_covering_1;
   vector<int> *dest = &single_covering_2;
+  vector<int> doubly_counted;
   for(int i=0; i<selection.size(); i++) {
 
     if (selection[i]) {
-      // DEBUG, TODO
-      //cout << "adding seleciton: " << i << endl;
-      //for(auto it = src->begin(); it != src->end(); ++it) {
-        //cout << *it << ' ';
-      //}
-
-      // TODO TODO: Need to track a doubly counted list - can't re-add later
-      dest->clear();
-      set_symmetric_difference(
-          src->begin(), 
-          src->end(), 
+      // remove all known doubly_covereds from base_stations
+      vector<int> base_stations_not_dc;
+      set_difference(
           data.antennas[i].base_stations.begin(), 
           data.antennas[i].base_stations.end(), 
+          doubly_counted.begin(), 
+          doubly_counted.end(), 
+          back_inserter(base_stations_not_dc));
+      //cout << "non-dc stations: " << base_stations_not_dc.size() << endl;
+
+      // add new double counts to doubly_counted
+      // no need to remove from base_stations_not_dc, symmetric difference will remove
+      set_intersection(
+          src->begin(), 
+          src->end(), 
+          base_stations_not_dc.begin(), 
+          base_stations_not_dc.end(), 
+          back_inserter(doubly_counted));
+      //cout << "new dc: " << doubly_counted.size() << endl;
+
+      set_symmetric_difference( // still need symmetric difference instead of union
+                                // because new dc's weren't removed from base_stations
+          src->begin(), 
+          src->end(), 
+          base_stations_not_dc.begin(), 
+          base_stations_not_dc.end(), 
           back_inserter(*dest));
+
+      src->clear();
       swap(src, dest); 
     }
   }
   //cout << "new score is " << dest->size() << endl;
-  return dest->size();
+  return src->size();
 }
