@@ -11,3 +11,8 @@ Greedy2:
   3. Walk through sorted range from step one, if the base station is not covered yet, add the most profitable antenna that covers it.
         Profitable: calculate for this antenna |# of base stations in this that don't receive signal upon adding this|/|# of total base stations that this covers|.
                     Adding this is a profit if the division above is below 0.5. 
+
+Bottomup:
+  1. Create a priority queue on antennas that could be added. Sort to maximize the change that adding the antenna to current set would have on the coverage of the set.
+  2. As long as antennas exist that would have a positive change on the set, pull antennas off the priority queue:
+  3. For each antenna pulled, add to the antenna set, update the coverage, update a validity table, and re-add remaining antenna choices to the priority queue. (validity table is used to quickly determine when antenna-change pairs added to the priority queue are still valid, since changes change as other antennas are added.)
