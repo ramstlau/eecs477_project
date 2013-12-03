@@ -76,6 +76,7 @@ int eval(const HittingSetData &data, const vector<bool> &selection) {
         //cout << *it << ' ';
       //}
 
+      // TODO TODO: Need to track a doubly counted list - can't re-add later
       dest->clear();
       set_symmetric_difference(
           src->begin(), 
