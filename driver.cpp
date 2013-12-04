@@ -2,7 +2,9 @@
 #include "greedy1.h"
 #include "greedy2.h" 
 #include "bruteforce2.h"
+#include "pq.h"
 #include "bottomup.h"
+#include "topdown.h"
 #include <iostream>
 #include <ctime>
 #include <utility>
@@ -31,7 +33,8 @@ int main(int argc, char *argv[])
   // Single solver
   clock_t algo_begin = clock();
   //Solver solver = &bottomup_int_input;
-  Solver solver = &bruteforce2;
+  Solver solver = &topdown_int_init;
+  //Solver solver = &bruteforce2;
   single_algo(data, set_antenna, num_covered_base_stations, solver);
   clock_t algo_end = clock();
   print_time(algo_begin, algo_end, "Algorithm"); 

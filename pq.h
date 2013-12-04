@@ -34,12 +34,4 @@ class PQElement {
   }
 };
 
-int get_delta(vector<int> &base_stations, int i, vector<int> *src);
-
-void update_coverage(
-    vector<int> *&src,
-    vector<int> *&dest,
-    vector<int> &doubly_counted,
-    vector<int> &base_stations);
-
 #endif /* _PQ_H_ */

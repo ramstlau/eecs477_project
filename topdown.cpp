@@ -9,6 +9,76 @@
 
 using namespace std;
 
+class Coverage {
+  public:
+    vector<int> coverage;
+    int score;
+    Coverage(int num_base_stations) {
+      coverage.resize(num_base_stations, 0);
+      score = 0;
+    }
+    Coverage(
+        HittingSetData &data, 
+        vector<bool> &set_antennas) 
+    {
+      score = 0;
+      coverage.resize(data.num_base_stations, 0);
+      for(int i=0; i<set_antennas.size(); ++i) {
+        for(int &j : data.antennas[i].base_stations) {
+          add_coverage(j);
+        }
+      }
+    }
+    void add_coverage(int &antenna)
+    {
+      if(coverage[antenna] == 1) {
+        --score;
+      }
+      ++coverage[antenna];
+      if(coverage[antenna] == 1) {
+        ++score;
+      }
+    }
+    void remove_coverage(int &antenna)
+    {
+      if(coverage[antenna] == 1) {
+        --score;
+      }
+      --coverage[antenna];
+      if(coverage[antenna] == 1) {
+        ++score;
+      }
+    }
+    int get_remove_delta(vector<int> &base_stations) {
+      int delta = 0;
+      for(int &i : base_stations) {
+        if(coverage[i] == 1) {
+          delta--;
+        }
+        if(coverage[i]-1 == 1) {
+          delta++;
+        }
+      }
+      return delta;
+    }
+    int get_add_delta(vector<int> &base_stations) {
+      int delta = 0;
+      for(int &i : base_stations) {
+        if(coverage[i] == 1) {
+          delta--;
+        }
+        if(coverage[i]+1 == 1) {
+          delta++;
+        }
+      }
+      return delta;
+    }
+};
+int get_topdown_delta(
+    HittingSetData &data, 
+    vector<int> &base_stations, 
+    vector<int> &coverage);
+
 void topdown(
     HittingSetData &data, 
     vector<bool> &set_antenna, // continues from this set
@@ -21,36 +91,44 @@ void topdown(
   vector<int> validity_table(data.antennas.size(), creation_stamper);
 
   // Build coverage map
-  vector<int> single_covering_1;
-  vector<int> single_covering_2;
-  vector<int> doubly_counted;
-  vector<int> *src = &single_covering_1;
-  vector<int> *dest = &single_covering_2;
-  for(int i=0; i<set_antenna.size(); i++) {
-    if (set_antenna[i]) {
-      update_coverage(src, dest, doubly_counted, data.antennas[i].base_stations);
-    }
-  }
+  Coverage coverage(data, set_antenna);
+  //vector<int> dest = coverage;
+  //for(int i=0; i<set_antenna.size(); i++) {
+    //if (set_antenna[i]) {
+      //add_coverage(coverage, data.antennas[i].base_stations);
+    //}
+  //}
 
   // Fill PQ
-  for(Antenna &a : data.antennas) {
-    pq.emplace(a.num, a.base_stations.size(), creation_stamper);
-    //cout << "emplaced: " << a.num << ' ' << a.base_stations.size() << ' ' << creation_stamper << endl;
+  for(int i=0; i<set_antenna.size(); i++) {
+    if (set_antenna[i]) {    // in antenna set
+      int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
+      //cout << "adding to PQ: " << i << " -- delta: " << delta << endl;
+      if (delta > 0) {        // make sure it's worth adding
+        pq.emplace(i, delta, creation_stamper); 
+      }
+    }
   }
   //cout << "pq size: " << pq.size() << endl;
 
   // RUN
-  //cout << "starting algo running" << endl;
-  PQElement current = pq.top();
-  pq.pop();
+  cout << "starting algo running, pq size: " << pq.size() << endl;
+  cout << "initial score: " << coverage.score << endl;
+  PQElement current;
   while(!pq.empty()) {   // TODO: force end when time runs out
+    // GET NEXT
+    if (!pq.empty()) {
+      current = pq.top();
+      pq.pop();
+    }
     
     //cout << "found " << current.antenna << " -- validity: " << current.creation_stamp << " -- delta: " << current.delta << endl;
     if(current.is_valid(validity_table)) {
       // update set & increment creation_stamper
       creation_stamper++;
-      set_antenna[current.antenna] = true; 
-      update_coverage(src, dest, doubly_counted, data.antennas[current.antenna].base_stations);
+      set_antenna[current.antenna] = false; 
+      coverage.remove_coverage(current.antenna);
+      cout << "new score: " << coverage.score << endl;
       // update validity table
       //cout << "updating validity table to " << creation_stamper << endl;
       for(int &i : data.antennas[current.antenna].base_stations) {
@@ -59,27 +137,31 @@ void topdown(
           validity_table[j] = creation_stamper;
         }
       }
-      // add updated to PQ
+      // re-add to PQ
       for(int i=0; i<set_antenna.size(); i++) {
-        if (!set_antenna[i]) {    // not already in antenna set
-          int delta = get_delta(data.antennas[i].base_stations, i, src);
+        if (set_antenna[i]) {    // in antenna set
+          int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
+          //cout << "adding to PQ: " << i << " -- delta: " << delta << endl;
           if (delta > 0) {        // make sure it's worth adding
             pq.emplace(i, delta, creation_stamper); 
           }
         }
       }
     }
-    // GET NEXT
-    if (!pq.empty()) {
-      current = pq.top();
-      pq.pop();
-    }
   }
-  //cout << "done running" << endl;
-  num_covered_base_stations = src->size();
+  cout << "done running" << endl;
+  num_covered_base_stations = coverage.score;
+}
+void topdown_init(
+    HittingSetData &data, 
+    vector<bool> &set_antenna, // ignores this set
+    int &num_covered_base_stations)
+{
+  set_antenna.resize(data.num_antennas, true);
+  topdown(data, set_antenna, num_covered_base_stations);
 }
 
-void topdown_int_input(
+void topdown_int(
     HittingSetData &data, 
     vector<int> &set_antenna, // continues from this set
     int &num_covered_base_stations)
@@ -101,85 +183,21 @@ void topdown_int_input(
     }
   }
 }
-
-void update_coverage(
-    vector<int> *&src, 
-    vector<int> *&dest,
-    vector<int> &doubly_counted, 
-    vector<int> &base_stations)
+void topdown_int_init(
+    HittingSetData &data, 
+    vector<int> &set_antenna, // ignores this set
+    int &num_covered_base_stations)
 {
-  cout << "UPDATE:" << endl;
-  cout << "src: " << src->size() << endl;
-  cout << "dest: " << dest->size() << endl;
-  cout << "stations: " << base_stations.size() << endl;
-  
-  // remove all known doubly_covereds from base_stations
-  vector<int> base_stations_not_dc;
-  set_difference(
-      base_stations.begin(), 
-      base_stations.end(), 
-      doubly_counted.begin(), 
-      doubly_counted.end(), 
-      back_inserter(base_stations_not_dc));
-  cout << "non-dc stations: " << base_stations_not_dc.size() << endl;
+  // ALGO
+  vector<bool> converted(data.num_antennas, true);
+  topdown(data, converted, num_covered_base_stations);
 
-  // add new double counts to doubly_counted
-  // no need to remove from base_stations_not_dc, symmetric difference will remove
-  set_intersection(
-      src->begin(), 
-      src->end(), 
-      base_stations_not_dc.begin(), 
-      base_stations_not_dc.end(), 
-      back_inserter(doubly_counted));   // this creates duplicates, might be able to improve
-  cout << "new dc: " << doubly_counted.size() << endl;
-
-  set_symmetric_difference( // still need symmetric difference instead of union
-                            // because new dc's weren't removed from base_stations
-      src->begin(), 
-      src->end(), 
-      base_stations_not_dc.begin(), 
-      base_stations_not_dc.end(), 
-      back_inserter(*dest));
-
-  src->clear();
-  swap(src, dest); 
-
-  cout << "AFTER:" << endl;
-  cout << "src: " << src->size() << endl;
-  cout << "dest: " << dest->size() << endl;
-}
-
-int get_delta(vector<int> &base_stations, int i, vector<int> *src)
-{
-  vector<int> temp;
-  set_symmetric_difference(
-      src->begin(),
-      src->end(),
-      base_stations.begin(),
-      base_stations.end(),
-      back_inserter(temp));
-
-  //cout << "src: " << endl;
-  //for(int &i : *src) {
-    //cout << i << ' ';
-  //}
-  //cout << endl;
-  //cout << "new: " << endl;
-  //for(int &i : base_stations) {
-    //cout << i << ' ';
-  //}
-  //cout << endl;
-  //cout << "temp: " << endl;
-  //for(int &i : temp) {
-    //cout << i << ' ';
-  //}
-  //cout << endl;
-
-  int old_coverage = src->size();
-  int new_coverage = temp.size();
-  //cout << "old count: " << old_coverage << endl;
-  //cout << "new count: " << new_coverage << endl;
-
-  return (new_coverage - old_coverage);
+  // BOOL -> INT
+  set_antenna.clear();
+  for(int i=0; i<converted.size(); i++) {
+    if (converted[i]) {
+      set_antenna.push_back(i);
+    }
+  }
 }
 

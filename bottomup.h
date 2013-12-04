@@ -22,7 +22,7 @@ void bottomup(
     HittingSetData &data, 
     vector<bool> &set_antenna, 
     int &num_covered_base_stations);
-void bottomup_int_input(
+void bottomup_int(
     HittingSetData &data, 
     vector<int> &set_antenna, 
     int &num_covered_base_stations);
