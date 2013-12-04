@@ -1,6 +1,8 @@
 #include "input.h"
 #include "pq.h"
 #include "topdown.h"
+#include "coverage.h"
+#include "bottomup2.h"
 #include <iostream>
 #include <algorithm>
 #include <utility>
@@ -9,91 +11,18 @@
 
 using namespace std;
 
-class Coverage {
-  public:
-    vector<int> coverage;
-    int score;
-    Coverage(int num_base_stations) {
-      coverage.resize(num_base_stations, 0);
-      score = 0;
-    }
-    Coverage(
-        HittingSetData &data, 
-        vector<bool> &set_antennas) 
-    {
-      score = 0;
-      coverage.resize(data.num_base_stations, 0);
-      for(int i=0; i<set_antennas.size(); ++i) {
-        add_coverage(data, i);
-      }
-    }
-    void add_coverage(HittingSetData &data, int &antenna) {
-      for(int &i : data.antennas[antenna].base_stations) {
-        if(coverage[i] == 1) {
-          --score;
-        }
-        ++coverage[i];
-        if(coverage[i] == 1) {
-          ++score;
-        }
-      }
-    }
-    void remove_coverage(HittingSetData &data, int &antenna) {
-      for(int &i : data.antennas[antenna].base_stations) {
-        if(coverage[i] == 1) {
-          --score;
-        }
-        --coverage[i];
-        if(coverage[i] == 1) {
-          ++score;
-        }
-      }
-    }
-    int get_remove_delta(vector<int> &base_stations) {
-      int delta = 0;
-      for(int &i : base_stations) {
-        if(coverage[i] == 1) {
-          delta--;
-        }
-        if(coverage[i]-1 == 1) {
-          delta++;
-        }
-      }
-      return delta;
-    }
-    int get_add_delta(vector<int> &base_stations) {
-      int delta = 0;
-      for(int &i : base_stations) {
-        if(coverage[i] == 1) {
-          delta--;
-        }
-        if(coverage[i]+1 == 1) {
-          delta++;
-        }
-      }
-      return delta;
-    }
-};
-
 void topdown(
     HittingSetData &data, 
     vector<bool> &set_antenna, // continues from this set
     int &num_covered_base_stations)
 {
-  //cout << "bottomup running" << endl;
   // Create PQ
-  TopDownPQ pq;
+  Max_PQ pq;
   int creation_stamper = 0;
   vector<int> validity_table(data.antennas.size(), creation_stamper);
 
   // Build coverage map
   Coverage coverage(data, set_antenna);
-  //vector<int> dest = coverage;
-  //for(int i=0; i<set_antenna.size(); i++) {
-    //if (set_antenna[i]) {
-      //add_coverage(coverage, data.antennas[i].base_stations);
-    //}
-  //}
 
   // Fill PQ
   for(int i=0; i<set_antenna.size(); i++) {
@@ -113,10 +42,8 @@ void topdown(
   PQElement current;
   while(!pq.empty()) {   // TODO: force end when time runs out
     // GET NEXT
-    if (!pq.empty()) {
-      current = pq.top();
-      pq.pop();
-    }
+    current = pq.top();
+    pq.pop();
     
     //cout << "found " << current.antenna << " -- validity: " << current.creation_stamp << " -- delta: " << current.delta << endl;
     if(current.is_valid(validity_table)) {
@@ -138,7 +65,8 @@ void topdown(
         if (set_antenna[i]) {    // in antenna set
           int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
           //cout << "adding to PQ: " << i << " -- delta: " << delta << endl;
-          if (delta > 0) {        // make sure it's worth adding
+          if (delta >= 0) {        // make sure it's worth adding
+                                   // allow 0's, might open up new benefits
             pq.emplace(i, delta, creation_stamper); 
           }
         }
@@ -146,6 +74,7 @@ void topdown(
     }
   }
   //cout << "done running" << endl;
+  //bottomup2(data, set_antenna, num_covered_base_stations);
   num_covered_base_stations = coverage.score;
 }
 void topdown_init(

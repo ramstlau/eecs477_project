@@ -27,7 +27,7 @@ void bottomup(
 {
   //cout << "bottomup running" << endl;
   // Create PQ
-  BotUpPQ pq;
+  Max_PQ pq;
   int creation_stamper = 0;
   vector<int> validity_table(data.antennas.size(), creation_stamper);
 

@@ -9,15 +9,6 @@
 
 using namespace std;
 
-class PQElement_Topdown_Compare {
-  public:
-    bool operator() (const PQElement &lhs, const PQElement &rhs) const {
-      return lhs.delta < rhs.delta; // sorts for max delta
-    }
-};
-
-typedef priority_queue<PQElement, deque<PQElement>, PQElement_Topdown_Compare> TopDownPQ;
-
 void topdown(
     HittingSetData &data, 
     vector<bool> &set_antenna, 

@@ -9,15 +9,6 @@
 
 using namespace std;
 
-class PQElement_Botup_Compare {
-  public:
-    bool operator() (const PQElement &lhs, const PQElement &rhs) const {
-      return lhs.delta < rhs.delta;
-    }
-};
-
-typedef priority_queue<PQElement, deque<PQElement>, PQElement_Botup_Compare> BotUpPQ;
-
 void bottomup(
     HittingSetData &data, 
     vector<bool> &set_antenna, 

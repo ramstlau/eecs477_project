@@ -34,4 +34,13 @@ class PQElement {
   }
 };
 
+class PQElement_Max_Compare {
+  public:
+    bool operator() (const PQElement &lhs, const PQElement &rhs) const {
+      return lhs.delta < rhs.delta;
+    }
+};
+
+typedef priority_queue<PQElement, deque<PQElement>, PQElement_Max_Compare> Max_PQ;
+
 #endif /* _PQ_H_ */

@@ -4,6 +4,8 @@
 #include "bruteforce2.h"
 #include "pq.h"
 #include "bottomup.h"
+#include "bottomup2.h"
+#include "coverage.h"
 #include "topdown.h"
 #include <iostream>
 #include <ctime>
@@ -32,7 +34,7 @@ int main(int argc, char *argv[])
 
   // Single solver
   clock_t algo_begin = clock();
-  //Solver solver = &bottomup_int;
+  //Solver solver = &bottomup2_int;
   Solver solver = &topdown_int_init;
   //Solver solver = &bruteforce2;
   single_algo(data, set_antenna, num_covered_base_stations, solver);
