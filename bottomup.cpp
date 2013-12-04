@@ -107,10 +107,12 @@ void bottomup_int(
   // BOOL -> INT
   set_antenna.clear();
   for(int i=0; i<converted.size(); i++) {
+    //cout << i << ' ';
     if (converted[i]) {
       set_antenna.push_back(i);
     }
   }
+  cout << endl;
 }
 
 void update_coverage(

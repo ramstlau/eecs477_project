@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 
   // Single solver
   clock_t algo_begin = clock();
-  //Solver solver = &bottomup_int_input;
+  //Solver solver = &bottomup_int;
   Solver solver = &topdown_int_init;
   //Solver solver = &bruteforce2;
   single_algo(data, set_antenna, num_covered_base_stations, solver);
@@ -57,6 +57,7 @@ void single_algo(HittingSetData &data, vector<int> &set_antenna, int &num_covere
   solver(data, set_antenna, num_covered_base_stations);
 
   clock_t output_begin = clock();
+  cout << set_antenna.size() << ' ';
   printVector(set_antenna);
   cout << num_covered_base_stations << endl;
   clock_t output_end = clock();

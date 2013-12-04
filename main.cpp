@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
   //greedy2(data, set_antenna, num_covered_base_stations);
   //bottomup_int(data, set_antenna, num_covered_base_stations);  
   topdown_int_init(data, set_antenna, num_covered_base_stations);  
-  cout << set_antenna.size();
+  cout << set_antenna.size() << ' ';
   printVector(set_antenna);
   cout << num_covered_base_stations << endl;
 	  

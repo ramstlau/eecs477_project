@@ -24,29 +24,29 @@ class Coverage {
       score = 0;
       coverage.resize(data.num_base_stations, 0);
       for(int i=0; i<set_antennas.size(); ++i) {
-        for(int &j : data.antennas[i].base_stations) {
-          add_coverage(j);
+        add_coverage(data, i);
+      }
+    }
+    void add_coverage(HittingSetData &data, int &antenna) {
+      for(int &i : data.antennas[antenna].base_stations) {
+        if(coverage[i] == 1) {
+          --score;
+        }
+        ++coverage[i];
+        if(coverage[i] == 1) {
+          ++score;
         }
       }
     }
-    void add_coverage(int &antenna)
-    {
-      if(coverage[antenna] == 1) {
-        --score;
-      }
-      ++coverage[antenna];
-      if(coverage[antenna] == 1) {
-        ++score;
-      }
-    }
-    void remove_coverage(int &antenna)
-    {
-      if(coverage[antenna] == 1) {
-        --score;
-      }
-      --coverage[antenna];
-      if(coverage[antenna] == 1) {
-        ++score;
+    void remove_coverage(HittingSetData &data, int &antenna) {
+      for(int &i : data.antennas[antenna].base_stations) {
+        if(coverage[i] == 1) {
+          --score;
+        }
+        --coverage[i];
+        if(coverage[i] == 1) {
+          ++score;
+        }
       }
     }
     int get_remove_delta(vector<int> &base_stations) {
@@ -74,10 +74,6 @@ class Coverage {
       return delta;
     }
 };
-int get_topdown_delta(
-    HittingSetData &data, 
-    vector<int> &base_stations, 
-    vector<int> &coverage);
 
 void topdown(
     HittingSetData &data, 
@@ -122,13 +118,13 @@ void topdown(
       pq.pop();
     }
     
-    cout << "found " << current.antenna << " -- validity: " << current.creation_stamp << " -- delta: " << current.delta << endl;
+    //cout << "found " << current.antenna << " -- validity: " << current.creation_stamp << " -- delta: " << current.delta << endl;
     if(current.is_valid(validity_table)) {
       // update set & increment creation_stamper
       creation_stamper++;
       set_antenna[current.antenna] = false; 
-      coverage.remove_coverage(current.antenna);
-      cout << "new score: " << coverage.score << endl;
+      coverage.remove_coverage(data, current.antenna);
+      //cout << "new score: " << coverage.score << endl;
       // update validity table
       //cout << "updating validity table to " << creation_stamper << endl;
       for(int &i : data.antennas[current.antenna].base_stations) {
