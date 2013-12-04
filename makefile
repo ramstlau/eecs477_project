@@ -14,37 +14,38 @@ PROG = cover
 all: $(PROG)
 
 driver: $(DRIVER_OBJS)
-	$(CC) $(DRIVER_OBJS) $(CFLAGS) -o driver
-	
+				$(CC) $(DRIVER_OBJS) $(CFLAGS) -o driver
+        
 $(PROG): $(OBJS)
-	$(CC) $(OBJS) $(CFLAGS) -o $(PROG)
+				$(CC) $(OBJS) $(CFLAGS) -o $(PROG)
 
-clean:
-	rm *.o
+clean: 
+				rm *.o
 
 input.o: input.cpp
-	$(CC) $(CFLAGS) -c input.cpp
+				$(CC) $(CFLAGS) -c input.cpp
 
 main.o: input.h greedy1.h greedy2.h main.cpp
-	$(CC) $(CFLAGS) -c main.cpp
+				$(CC) $(CFLAGS) -c main.cpp
 
 bruteforce.o: input.h bruteforce.cpp
-	$(CC) $(CFLAGS) -c bruteforce.cpp
+				$(CC) $(CFLAGS) -c bruteforce.cpp
 
 bruteforce2.o: input.h bruteforce2.h bruteforce2.cpp
-	$(CC) $(CFLAGS) -c bruteforce2.cpp
-	
+				$(CC) $(CFLAGS) -c bruteforce2.cpp
+			
 greedy1.o: input.h greedy1.cpp
-	$(CC) $(CFLAGS) -c greedy1.cpp
+				$(CC) $(CFLAGS) -c greedy1.cpp
 
 greedy2.o: input.h greedy1.h greedy2.cpp
-	$(CC) $(CFLAGS) -c greedy2.cpp
+				$(CC) $(CFLAGS) -c greedy2.cpp
 
 bottomup.o: input.h bottomup.h bottomup.cpp pq.h
-	$(CC) $(CFLAGS) -c bottomup.cpp
+				$(CC) $(CFLAGS) -c bottomup.cpp
 topdown.o: input.h topdown.h topdown.cpp pq.h
-	$(CC) $(CFLAGS) -c topdown.cpp
+				$(CC) $(CFLAGS) -c topdown.cpp
 
 driver.o: driver.cpp
-	$(CC) $(CFLAGS) -c driver.cpp
+				$(CC) $(CFLAGS) -c driver.cpp
+
 
