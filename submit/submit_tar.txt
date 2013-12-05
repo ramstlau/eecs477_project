@@ -1,2 +1,0 @@
- //run this in the submit directory and rename the tar file
- tar -pczf ../submitX.tar.gz ./

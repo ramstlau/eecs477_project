@@ -3,7 +3,9 @@
 #include "greedy2.h"
 #include "pq.h"
 #include "bottomup.h"
+#include "bottomup2.h"
 #include "topdown.h"
+#include "maxdelta.h"
 #include <iostream>
 #include <sstream>
 
@@ -20,9 +22,10 @@ int main(int argc, char *argv[])
   
   vector<int> set_antenna;
   int num_covered_base_stations = 0;
-  //greedy2(data, set_antenna, num_covered_base_stations);
+  //greedy1(data, set_antenna, num_covered_base_stations);
   //bottomup_int(data, set_antenna, num_covered_base_stations);  
-  topdown_int_init(data, set_antenna, num_covered_base_stations);  
+  //topdown_int_init(data, set_antenna, num_covered_base_stations);  
+  maxdelta_int(data, set_antenna, num_covered_base_stations);
   cout << set_antenna.size() << ' ';
   printVector(set_antenna);
   cout << num_covered_base_stations << endl;

@@ -1,8 +1,8 @@
 #include "input.h"
 #include "pq.h"
+#include "bottomup2.h"
 #include "topdown.h"
 #include "coverage.h"
-#include "bottomup2.h"
 #include <iostream>
 #include <algorithm>
 #include <utility>
@@ -11,11 +11,12 @@
 
 using namespace std;
 
-void topdown(
+void bottomup2(
     HittingSetData &data, 
     vector<bool> &set_antenna, // continues from this set
     int &num_covered_base_stations)
 {
+  //cout << "bottomup2 running" << endl;
   // Create PQ
   clock_t algo_begin = clock();
   Max_PQ pq;
@@ -26,38 +27,41 @@ void topdown(
   Coverage coverage(data, set_antenna);
 
   // Fill PQ
+  //cout << "filling pq" << endl;
   for(int i=0; i<set_antenna.size(); i++) {
-    if (set_antenna[i]) {    // in antenna set
-      int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
+    //cout << i << endl;
+    if (!set_antenna[i]) {
+      int delta = coverage.get_add_delta(data.antennas[i].base_stations);
+      //cout << delta << endl;
       if (delta >= 0) {
-        pq.emplace(i, delta, creation_stamper); 
+        //cout << "emplaced: " << i << " -- delta: " << delta << endl;
+        pq.emplace(i, delta, creation_stamper);
       }
     }
   }
-  //cout << "pq size: " << pq.size() << endl;
+  //cout << "size of pq: " << pq.size() << endl;
+  //coverage.print();
 
   // RUN
-  //cout << "starting algo running, pq size: " << pq.size() << endl;
-  //cout << "initial score: " << coverage.score << endl;
+  //cout << "starting algo running" << endl;
   PQElement current;
   while(!pq.empty()) {   // TODO: force end when time runs out
-    
+
     // CHECK TIME
     double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
     if (elapsed_secs > 10) {
       break;
     }
-    
+
     // GET NEXT
     current = pq.top();
     pq.pop();
     
-    //cout << "found " << current.antenna << " -- validity: " << current.creation_stamp << " -- delta: " << current.delta << endl;
     if(current.is_valid(validity_table)) {
       // update set & increment creation_stamper
       creation_stamper++;
-      set_antenna[current.antenna] = false; 
-      coverage.remove_coverage(data, current.antenna);
+      set_antenna[current.antenna] = true; 
+      coverage.add_coverage(data, current.antenna);
       //cout << "new score: " << coverage.score << endl;
       // update validity table
       //cout << "updating validity table to " << creation_stamper << endl;
@@ -69,10 +73,9 @@ void topdown(
       }
       // re-add to PQ
       for(int i=0; i<set_antenna.size(); i++) {
-        if (set_antenna[i]) {    // in antenna set
-          int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
+        if (!set_antenna[i]) {    // not already in antenna set
+          int delta = coverage.get_add_delta(data.antennas[i].base_stations);
           if (delta >= 0) {        // make sure it's worth adding
-                                   // allow 0's, might open up new benefits
             pq.emplace(i, delta, creation_stamper); 
           }
         }
@@ -80,19 +83,10 @@ void topdown(
     }
   }
   //cout << "done running" << endl;
-  //bottomup2(data, set_antenna, num_covered_base_stations);
   num_covered_base_stations = coverage.score;
 }
-void topdown_init(
-    HittingSetData &data, 
-    vector<bool> &set_antenna, // ignores this set
-    int &num_covered_base_stations)
-{
-  set_antenna.resize(data.num_antennas, true);
-  topdown(data, set_antenna, num_covered_base_stations);
-}
 
-void topdown_int(
+void bottomup2_int(
     HittingSetData &data, 
     vector<int> &set_antenna, // continues from this set
     int &num_covered_base_stations)
@@ -100,11 +94,12 @@ void topdown_int(
   // INT -> BOOL
   vector<bool> converted(data.num_antennas, false);
   for(int &i : set_antenna) {
+    //cout << i << " is added" << endl;
     converted[i] = true;
   }
 
   // ALGO
-  topdown(data, converted, num_covered_base_stations);
+  bottomup2(data, converted, num_covered_base_stations);
 
   // BOOL -> INT
   set_antenna.clear();
@@ -113,22 +108,5 @@ void topdown_int(
       set_antenna.push_back(i);
     }
   }
+  //cout << endl;
 }
-void topdown_int_init(
-    HittingSetData &data, 
-    vector<int> &set_antenna, // ignores this set
-    int &num_covered_base_stations)
-{
-  // ALGO
-  vector<bool> converted(data.num_antennas, true);
-  topdown(data, converted, num_covered_base_stations);
-
-  // BOOL -> INT
-  set_antenna.clear();
-  for(int i=0; i<converted.size(); i++) {
-    if (converted[i]) {
-      set_antenna.push_back(i);
-    }
-  }
-}
-
