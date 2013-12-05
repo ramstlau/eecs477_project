@@ -15,6 +15,10 @@ class Coverage {
       coverage.resize(num_base_stations, 0);
       score = 0;
     }
+    Coverage(const Coverage &copy) {
+      coverage = copy.coverage;
+      score = copy.score;
+    }
     Coverage(
         HittingSetData &data, 
         vector<bool> &set_antennas) 

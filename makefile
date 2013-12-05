@@ -15,7 +15,7 @@ PROG = cover
 
 all: $(PROG)
 
-driver: $(DRIVER_OBJS)
+driver: $(DRIVER_OBJS) driver.h
 				$(CC) $(DRIVER_OBJS) $(CFLAGS) -o driver
         
 $(PROG): $(OBJS)
@@ -30,7 +30,7 @@ tar:
 input.o: input.cpp
 				$(CC) $(CFLAGS) -c input.cpp
 
-main.o: input.h greedy1.h greedy2.h main.cpp
+main.o: input.h greedy1.h greedy2.h pq.h bottomup2.h topdown.h maxdelta.h maxdelta2.h driver.h main.cpp
 				$(CC) $(CFLAGS) -c main.cpp
 
 bruteforce.o: input.h bruteforce.cpp

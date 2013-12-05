@@ -1,4 +1,5 @@
 #include "input.h"
+#include "driver.h"
 #include "greedy1.h"
 #include "greedy2.h" 
 #include "bruteforce2.h"
@@ -23,6 +24,7 @@ void print_time(const clock_t &begin, const clock_t &end, string period_name);
 void single_algo(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations, Solver solver);
 void all_algos(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations, vector<pair<string, Solver> > solvers);
 
+
 int main(int argc, char *argv[])
 {
         
@@ -38,13 +40,7 @@ int main(int argc, char *argv[])
   print_time(input_begin, input_end, "Input"); 
 
   // RANDOMIZE THE SEED DATA
-  srand(time(NULL));
-  const int DENSITY = RAND_MAX / 4;
-  for(int i=0; i<data.num_antennas; ++i) {
-    if (rand() < DENSITY) {
-      set_antenna.push_back(i);
-    }
-  }
+  randomize_seed_data(data, set_antenna);
 
   // SINGLE SOLVER
   //Solver solver = &greedy2;
@@ -63,9 +59,9 @@ int main(int argc, char *argv[])
   solvers.push_back(make_pair<string, Solver>("Greedy 2", &greedy2));
   // bottomup is broken, don't include
   solvers.push_back(make_pair<string, Solver>("Bottomup2", &bottomup2_int));
-  solvers.push_back(make_pair<string, Solver>("Topdown", &topdown_int_init));
+  //solvers.push_back(make_pair<string, Solver>("Topdown", &topdown_int_init));
   solvers.push_back(make_pair<string, Solver>("Maxdelta", &maxdelta_int));
-  solvers.push_back(make_pair<string, Solver>("Maxdelta2", &maxdelta2_int));
+  //solvers.push_back(make_pair<string, Solver>("Maxdelta2", &maxdelta2_int));
   solvers.push_back(make_pair<string, Solver>("Maxdelta3", &maxdelta3_int));
   all_algos(data, set_antenna, num_covered_base_stations, solvers);
   

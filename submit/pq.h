@@ -30,7 +30,7 @@ struct PQElement {
     delta = _delta;
     creation_stamp = _creation_stamp;
   }
-  bool is_valid( vector<int> validity_table ) {
+  bool is_valid( vector<int> &validity_table ) {
     return validity_table[antenna] <= creation_stamp;
   }
 };

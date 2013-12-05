@@ -14,10 +14,10 @@ using namespace std;
 void topdown(
     HittingSetData &data, 
     vector<bool> &set_antenna, // continues from this set
-    int &num_covered_base_stations)
+    int &num_covered_base_stations,
+    clock_t &algo_begin)
 {
   // Create PQ
-  clock_t algo_begin = clock();
   Max_PQ pq;
   int creation_stamper = 0;
   vector<int> validity_table(data.antennas.size(), creation_stamper);
@@ -44,7 +44,8 @@ void topdown(
     
     // CHECK TIME
     double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
-    if (elapsed_secs > 10) {
+    //cout << elapsed_secs << endl;
+    if (elapsed_secs > 0.25) {
       break;
     }
     
@@ -71,7 +72,7 @@ void topdown(
       for(int i=0; i<set_antenna.size(); i++) {
         if (set_antenna[i]) {    // in antenna set
           int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
-          if (delta >= 0) {        // make sure it's worth adding
+          if (delta > 0) {        // make sure it's worth adding
                                    // allow 0's, might open up new benefits
             pq.emplace(i, delta, creation_stamper); 
           }
@@ -86,16 +87,18 @@ void topdown(
 void topdown_init(
     HittingSetData &data, 
     vector<bool> &set_antenna, // ignores this set
-    int &num_covered_base_stations)
+    int &num_covered_base_stations,
+    clock_t &algo_begin)
 {
   set_antenna.resize(data.num_antennas, true);
-  topdown(data, set_antenna, num_covered_base_stations);
+  topdown(data, set_antenna, num_covered_base_stations, algo_begin);
 }
 
 void topdown_int(
     HittingSetData &data, 
     vector<int> &set_antenna, // continues from this set
-    int &num_covered_base_stations)
+    int &num_covered_base_stations,
+    clock_t &algo_begin)
 {
   // INT -> BOOL
   vector<bool> converted(data.num_antennas, false);
@@ -104,7 +107,7 @@ void topdown_int(
   }
 
   // ALGO
-  topdown(data, converted, num_covered_base_stations);
+  topdown(data, converted, num_covered_base_stations, algo_begin);
 
   // BOOL -> INT
   set_antenna.clear();
@@ -117,11 +120,12 @@ void topdown_int(
 void topdown_int_init(
     HittingSetData &data, 
     vector<int> &set_antenna, // ignores this set
-    int &num_covered_base_stations)
+    int &num_covered_base_stations,
+    clock_t &algo_begin)
 {
   // ALGO
   vector<bool> converted(data.num_antennas, true);
-  topdown(data, converted, num_covered_base_stations);
+  topdown(data, converted, num_covered_base_stations, algo_begin);
 
   // BOOL -> INT
   set_antenna.clear();
