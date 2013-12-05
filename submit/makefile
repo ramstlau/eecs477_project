@@ -4,9 +4,11 @@ LD_RUN_PATH := /usr/um/rhel_6/gcc-4.7.0/lib64:/usr/um/rhel_6/mpc-0.9/lib/:/usr/u
 
 CC = LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) g++
 
-CFLAGS= -Wall -Werror -std=c++11 -O3
+CFLAGS= -std=c++11 -O3
 
-OBJS = input.o greedy1.o greedy2.o bottomup.o bottomup2.o topdown.o maxdelta.o main.o
+# bottomup.o purposely excluded from build -- it's broken and causes errors.
+OBJS = input.o greedy1.o greedy2.o bottomup2.o topdown.o maxdelta.o main.o
+
 DRIVER_OBJS = input.o greedy1.o greedy2.o bruteforce2.o bottomup.o bottomup2.o topdown.o maxdelta.o driver.o validator.o
 
 PROG = cover
@@ -20,7 +22,7 @@ $(PROG): $(OBJS)
 				$(CC) $(OBJS) $(CFLAGS) -o $(PROG)
 
 clean: 
-				rm *.o cover solver driver
+				rm *.o cover solver driver *.gz
 
 tar:
 				tar -pczf ../submit.tar.gz ./

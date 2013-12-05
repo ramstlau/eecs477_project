@@ -15,12 +15,9 @@ void maxdelta(
     vector<bool> &set_antenna, // continues from this set
     int &num_covered_base_stations)
 {
-  //cout << "maxdelta running" << endl;
   // Create PQ
   clock_t algo_begin = clock();
   Max_PQ2 pq;
-  int creation_stamper = 0;
-  vector<int> validity_table(data.antennas.size(), creation_stamper);
 
   // Build coverage map
   Coverage coverage(data, set_antenna);
@@ -30,20 +27,17 @@ void maxdelta(
     if (!set_antenna[i]) { // not in set
       int delta = coverage.get_add_delta(data.antennas[i].base_stations);
       if (delta > 0) {
-        pq.emplace(i, delta, creation_stamper, true);
+        pq.emplace(i, delta, true);
       }
     } else { // already in set
       int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
       if (delta > 0) { // 0's can open up new benefits
-        pq.emplace(i, delta, creation_stamper, false);
+        pq.emplace(i, delta, false);
       }
     }
   }
-  //cout << "size of pq: " << pq.size() << endl;
-  //coverage.print();
 
   // RUN
-  //cout << "starting algo running" << endl;
   PQElement2 current;
   while(!pq.empty()) {   // TODO: force end when time runs out
     
@@ -55,45 +49,32 @@ void maxdelta(
     
     // GET NEXT
     current = pq.top();
-    pq.pop();
+    pq = Max_PQ2(); // reset the PQ
     
-    //cout << "found " << current.antenna << " -- validity: " << current.creation_stamp << " -- delta: " << current.delta << endl;
-    if(current.is_valid(validity_table)) {
-      // update set & increment creation_stamper
-      creation_stamper++;
-      if (current.add) {
-        set_antenna[current.antenna] = true; 
-        coverage.add_coverage(data, current.antenna);
-      } else { // remove
-        set_antenna[current.antenna] = false; 
-        coverage.remove_coverage(data, current.antenna);
-      }
-      //cout << "new score: " << coverage.score << endl;
-      // update validity table
-      //cout << "updating validity table to " << creation_stamper << endl;
-      for(int &i : data.antennas[current.antenna].base_stations) {
-        Base_Station &bs = data.base_stations[i]; // each affected base station
-        for(int &j : bs.coverage) {               // mark update to covering antennas
-          validity_table[j] = creation_stamper;
+    // UPDATE set & coverage
+    if (current.add) {
+      set_antenna[current.antenna] = true; 
+      coverage.add_coverage(data, current.antenna);
+    } else { // remove
+      set_antenna[current.antenna] = false; 
+      coverage.remove_coverage(data, current.antenna);
+    }
+
+    // RE-ADD to PQ
+    for(int i=0; i<set_antenna.size(); i++) {
+      if (!set_antenna[i]) { // not in set
+        int delta = coverage.get_add_delta(data.antennas[i].base_stations);
+        if (delta >= 0) {
+          pq.emplace(i, delta, true);
         }
-      }
-      // re-add to PQ
-      for(int i=0; i<set_antenna.size(); i++) {
-        if (!set_antenna[i]) { // not in set
-          int delta = coverage.get_add_delta(data.antennas[i].base_stations);
-          if (delta >= 0) {
-            pq.emplace(i, delta, creation_stamper, true);
-          }
-        } else { // already in set
-          int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
-          if (delta >= 0) {
-            pq.emplace(i, delta, creation_stamper, false);
-          }
+      } else { // already in set
+        int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
+        if (delta >= 0) {
+          pq.emplace(i, delta, false);
         }
       }
     }
   }
-  //cout << "done running" << endl;
   num_covered_base_stations = coverage.score;
 }
 
@@ -119,5 +100,4 @@ void maxdelta_int(
       set_antenna.push_back(i);
     }
   }
-  //cout << endl;
 }
