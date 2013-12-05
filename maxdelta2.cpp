@@ -43,12 +43,21 @@ void maxdelta2(
   // RUN
   //int iterations = 0;
   vector<int> swap_blacklist;
-  while(swap_blacklist.size() < data.num_antennas) {
+  bool change_since_blacklist_clear;
+  while(true) {
+    if (swap_blacklist.size() > data.num_antennas) {
+      if (change_since_blacklist_clear) {
+        swap_blacklist.clear();
+        change_since_blacklist_clear = false;
+      } else {
+        break;
+      }
+    }
     //++iterations;
     
     // CHECK TIME
     double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
-    if (elapsed_secs > 20) {
+    if (elapsed_secs > 10) {
       break;
     }
     
@@ -104,6 +113,11 @@ void maxdelta2(
       // FIND SWAP
       PQElement2 swap;
       for(int i=0; i<set_antenna.size(); i++) {
+        // <note> This sometimes hinders performance
+        //if (i == current.antenna) {
+          //continue;
+        //}
+        // </note>
         if (set_antenna[i]) { // in set
           int delta = copy.get_remove_delta(data.antennas[i].base_stations);
           if (delta > swap.delta) {
@@ -122,9 +136,14 @@ void maxdelta2(
           }
         }
       }
-      if (swap.delta + current.delta > 0) {
-        cout << "SWAP! delta: " << current.delta << " + " << swap.delta << endl;
-        cout << "antennas: " << current.antenna << " & " << swap.antenna << endl;
+      if (swap.delta + current.delta >= 0) {
+        if (swap.delta + current.delta > 0) { // disallow = to prevent loops
+          change_since_blacklist_clear = true;
+          //cout << "Gainful swap! deltas: " << current.delta << " + " << swap.delta << endl;
+          //cout << "antennas: " << current.antenna << " & " << swap.antenna << endl;
+          //double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
+          //cout << "Time: " << elapsed_secs << endl;
+        }
         // ADD SWAP
         if (swap.add) {
           set_antenna[swap.antenna] = true; 
@@ -139,17 +158,16 @@ void maxdelta2(
         } else { // remove
           coverage.remove_coverage(data, current.antenna);
         }
-        swap_blacklist.clear(); // should only clear when full, stop when no change btwn clears
-      } else {
-        swap_blacklist.push_back(current.antenna);
-        //cout << "blacklisted: " << current.antenna << " -- total size: " << swap_blacklist.size() << endl;
-        
+      } else { 
         // UNDO TEMPORARY ADD
         if (current.add) {
           set_antenna[current.antenna] = false; 
         } else { // remove
           set_antenna[current.antenna] = true; 
         }
+      }
+      if (swap.delta + current.delta <= 0) { // = because we don't want loops
+        swap_blacklist.push_back(current.antenna);
       }
     }
   }
