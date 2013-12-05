@@ -1,6 +1,6 @@
 #include "input.h"
 #include "pq.h"
-#include "maxdelta.h"
+#include "maxdelta2.h"
 #include "coverage.h"
 #include <iostream>
 #include <algorithm>
@@ -10,37 +10,39 @@
 
 using namespace std;
 
-void maxdelta(
+void maxdelta2(
     HittingSetData &data, 
     vector<bool> &set_antenna, // continues from this set
     int &num_covered_base_stations)
 {
   // Create PQ
   clock_t algo_begin = clock();
-  Max_PQ2 pq;
+  PQElement2 current;
 
   // Build coverage map
   Coverage coverage(data, set_antenna);
 
   // Fill PQ
   for(int i=0; i<set_antenna.size(); i++) {
-    if (!set_antenna[i]) { // not in set
-      int delta = coverage.get_add_delta(data.antennas[i].base_stations);
-      if (delta > 0) {
-        pq.emplace(i, delta, true);
-      }
-    } else { // already in set
+    if (set_antenna[i]) { // in set
       int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
-      if (delta > 0) { // 0's can open up new benefits
-        pq.emplace(i, delta, false);
+      //cout << "remove: " << delta;
+      if (delta > current.delta) {
+        current = PQElement2(i, delta, false); // remove
+      }
+    } else { // not in set
+      int delta = coverage.get_add_delta(data.antennas[i].base_stations);
+      //cout << "add: " << delta;
+      if (delta > current.delta) {
+        current = PQElement2(i, delta, true); // add
       }
     }
+    //cout << " versus " << current.delta << endl;
   }
 
   // RUN
   int iterations = 0;
-  PQElement2 current;
-  while(!pq.empty()) {   // TODO: force end when time runs out
+  while(current.delta >= 0) {
     ++iterations;
     
     // CHECK TIME
@@ -48,10 +50,6 @@ void maxdelta(
     if (elapsed_secs > 10) {
       break;
     }
-    
-    // GET NEXT
-    current = pq.top();
-    pq = Max_PQ2(); // reset the PQ
     
     // UPDATE set & coverage
     if (current.add) {
@@ -62,26 +60,27 @@ void maxdelta(
       coverage.remove_coverage(data, current.antenna);
     }
 
-    // RE-ADD to PQ
+    // GET NEXT
+    current = PQElement2();
     for(int i=0; i<set_antenna.size(); i++) {
-      if (!set_antenna[i]) { // not in set
-        int delta = coverage.get_add_delta(data.antennas[i].base_stations);
-        if (delta >= 0) {
-          pq.emplace(i, delta, true);
-        }
-      } else { // already in set
+      if (set_antenna[i]) { // in set
         int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
-        if (delta >= 0) {
-          pq.emplace(i, delta, false);
+        if (delta > current.delta) {
+          current = PQElement2(i, delta, false); // add
+        }
+      } else { // not in set
+        int delta = coverage.get_add_delta(data.antennas[i].base_stations);
+        if (delta > current.delta) {
+          current = PQElement2(i, delta, true); // add
         }
       }
     }
   }
   num_covered_base_stations = coverage.score;
-  cout << "num iterations: " << iterations << endl; 
+  cout << "num iterations: " << iterations << endl;
 }
 
-void maxdelta_int(
+void maxdelta2_int(
     HittingSetData &data, 
     vector<int> &set_antenna, // continues from this set
     int &num_covered_base_stations)
@@ -94,7 +93,7 @@ void maxdelta_int(
   }
 
   // ALGO
-  maxdelta(data, converted, num_covered_base_stations);
+  maxdelta2(data, converted, num_covered_base_stations);
 
   // BOOL -> INT
   set_antenna.clear();

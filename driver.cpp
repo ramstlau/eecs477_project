@@ -2,10 +2,11 @@
 #include "greedy1.h"
 #include "greedy2.h" 
 #include "bruteforce2.h"
-#include "bottomup.h"
+//#include "bottomup.h"
 #include "bottomup2.h"
 #include "topdown.h"
 #include "maxdelta.h"
+#include "maxdelta2.h"
 #include "pq.h"
 #include "coverage.h"
 #include "validator.h"
@@ -48,10 +49,11 @@ int main(int argc, char *argv[])
   vector<pair<string, Solver> > solvers;
   solvers.push_back(make_pair<string, Solver>("Greedy 1", &greedy1));
   solvers.push_back(make_pair<string, Solver>("Greedy 2", &greedy2));
-  solvers.push_back(make_pair<string, Solver>("Bottomup", &bottomup_int));
+  //solvers.push_back(make_pair<string, Solver>("Bottomup", &bottomup_int)); // broken
   solvers.push_back(make_pair<string, Solver>("Bottomup2", &bottomup2_int));
   solvers.push_back(make_pair<string, Solver>("Topdown", &topdown_int_init));
   solvers.push_back(make_pair<string, Solver>("Maxdelta", &maxdelta_int));
+  solvers.push_back(make_pair<string, Solver>("Maxdelta2", &maxdelta2_int));
   all_algos(data, set_antenna, num_covered_base_stations, solvers);
   
   
