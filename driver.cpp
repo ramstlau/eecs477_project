@@ -12,6 +12,8 @@
 #include "validator.h"
 #include <iostream>
 #include <ctime>
+#include <time.h>
+#include <cstdlib>
 #include <utility>
 
 typedef void (*Solver)(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations);
@@ -36,25 +38,41 @@ int main(int argc, char *argv[])
   
 
   // Single solver
-  //clock_t algo_begin = clock();
+  clock_t algo_begin = clock();
+
+  // RANDOMIZE THE SEED DATA
+  srand(time(NULL));
+  const int DENSITY = RAND_MAX / 4;
+  for(int i=0; i<data.num_antennas; ++i) {
+    if (rand() < DENSITY) {
+      set_antenna.push_back(i);
+    }
+  }
+
+  //Solver solver = &greedy2;
   //Solver solver = &bottomup2_int;
   //Solver solver = &topdown_int_init;
-  //Solver solver = &maxdelta_int;
+  Solver solver = &maxdelta2_int;
   //Solver solver = &bruteforce2;
-  //single_algo(data, set_antenna, num_covered_base_stations, solver);
-  //clock_t algo_end = clock();
-  //print_time(algo_begin, algo_end, "Algorithm"); 
+  single_algo(data, set_antenna, num_covered_base_stations, solver);
+
+  // PIPE OUTPUT FOR CONTINUATION
+  //Solver solver2 = &maxdelta2_int;
+  //single_algo(data, set_antenna, num_covered_base_stations, solver2);
+
+  clock_t algo_end = clock();
+  print_time(algo_begin, algo_end, "Algorithm"); 
 
   // All solvers
-  vector<pair<string, Solver> > solvers;
-  solvers.push_back(make_pair<string, Solver>("Greedy 1", &greedy1));
-  solvers.push_back(make_pair<string, Solver>("Greedy 2", &greedy2));
+  //vector<pair<string, Solver> > solvers;
+  //solvers.push_back(make_pair<string, Solver>("Greedy 1", &greedy1));
+  //solvers.push_back(make_pair<string, Solver>("Greedy 2", &greedy2));
   //solvers.push_back(make_pair<string, Solver>("Bottomup", &bottomup_int)); // broken
-  solvers.push_back(make_pair<string, Solver>("Bottomup2", &bottomup2_int));
-  solvers.push_back(make_pair<string, Solver>("Topdown", &topdown_int_init));
-  solvers.push_back(make_pair<string, Solver>("Maxdelta", &maxdelta_int));
-  solvers.push_back(make_pair<string, Solver>("Maxdelta2", &maxdelta2_int));
-  all_algos(data, set_antenna, num_covered_base_stations, solvers);
+/*  solvers.push_back(make_pair<string, Solver>("Bottomup2", &bottomup2_int));*/
+  //solvers.push_back(make_pair<string, Solver>("Topdown", &topdown_int_init));
+  //solvers.push_back(make_pair<string, Solver>("Maxdelta", &maxdelta_int));
+  //solvers.push_back(make_pair<string, Solver>("Maxdelta2", &maxdelta2_int));
+  //all_algos(data, set_antenna, num_covered_base_stations, solvers);
   
   
   clock_t end = clock();

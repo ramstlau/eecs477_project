@@ -44,6 +44,7 @@ void topdown(
     
     // CHECK TIME
     double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
+    cout << elapsed_secs << endl;
     if (elapsed_secs > 10) {
       break;
     }
@@ -71,7 +72,7 @@ void topdown(
       for(int i=0; i<set_antenna.size(); i++) {
         if (set_antenna[i]) {    // in antenna set
           int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
-          if (delta >= 0) {        // make sure it's worth adding
+          if (delta > 0) {        // make sure it's worth adding
                                    // allow 0's, might open up new benefits
             pq.emplace(i, delta, creation_stamper); 
           }
