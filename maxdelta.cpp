@@ -86,7 +86,7 @@ void maxdelta(
           }
         } else { // already in set
           int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
-          if (delta > 0) { // 0's can open up new benefits
+          if (delta >= 0) {
             pq.emplace(i, delta, creation_stamper, false);
           }
         }

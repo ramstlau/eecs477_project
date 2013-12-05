@@ -76,24 +76,27 @@ void single_algo(HittingSetData &data, vector<int> &set_antenna, int &num_covere
 void all_algos(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations, vector<pair<string, Solver> > solvers) {
 
   clock_t algo_begin, algo_end;
+  vector<int> set_antenna_copy;
+  int num_covered_base_stations_copy = num_covered_base_stations;
   for(pair<string, Solver> &p : solvers) {
+    set_antenna_copy = set_antenna;
     string solver_name = p.first;
     Solver solver = p.second;
 
     algo_begin = clock(); 
-    solver(data, set_antenna, num_covered_base_stations);
-    unsigned int score = num_covered_base_stations;
+    solver(data, set_antenna_copy, num_covered_base_stations_copy);
+    unsigned int score = num_covered_base_stations_copy;
     try {
-      validate(data, set_antenna, score);
+      validate(data, set_antenna_copy, score);
     } catch(...) {
       cout << "VALIDATOR FAILED" << endl;
     }
     algo_end = clock();
 
     print_time(algo_begin, algo_end, solver_name);
-    cout << set_antenna.size() << " ";
-    printVector(set_antenna);
-    cout << num_covered_base_stations << endl << endl;
+    //cout << set_antenna.size() << " ";
+    //printVector(set_antenna);
+    cout << num_covered_base_stations_copy << endl << endl;
   }
 }
 

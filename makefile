@@ -6,7 +6,7 @@ CC = LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) g++
 
 CFLAGS= -Wall -Werror -std=c++11 -O3
 
-OBJS = input.o greedy1.o greedy2.o bottomup.o bottomup2.o topdown.o main.o
+OBJS = input.o greedy1.o greedy2.o bottomup.o bottomup2.o topdown.o maxdelta.o main.o
 DRIVER_OBJS = input.o greedy1.o greedy2.o bruteforce2.o bottomup.o bottomup2.o topdown.o maxdelta.o driver.o validator.o
 
 PROG = cover
