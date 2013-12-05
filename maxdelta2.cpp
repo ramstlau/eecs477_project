@@ -42,30 +42,36 @@ void maxdelta2(
 
   // RUN
   //int iterations = 0;
-  while(current.delta >= 0) {
+  vector<int> swap_blacklist;
+  while(swap_blacklist.size() < data.num_antennas) {
     //++iterations;
     
     // CHECK TIME
     double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
-    if (elapsed_secs > 10) {
+    if (elapsed_secs > 20) {
       break;
     }
     
     // UPDATE set & coverage
-    if (current.add) {
-      set_antenna[current.antenna] = true; 
-      coverage.add_coverage(data, current.antenna);
-    } else { // remove
-      set_antenna[current.antenna] = false; 
-      coverage.remove_coverage(data, current.antenna);
+    if (current.delta > 0) {
+      if (current.add) {
+        set_antenna[current.antenna] = true; 
+        coverage.add_coverage(data, current.antenna);
+      } else { // remove
+        set_antenna[current.antenna] = false; 
+        coverage.remove_coverage(data, current.antenna);
+      }
     }
 
     // GET NEXT
-    current.delta = -1; // loop will break unless better delta is found.
+    current.delta = -1000;
     for(int i=0; i<set_antenna.size(); i++) {
       if (set_antenna[i]) { // in set
         int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
-        if (delta > current.delta) {
+        if (delta > current.delta && find(
+              swap_blacklist.begin(), 
+              swap_blacklist.end(), 
+              i) == swap_blacklist.end()) {
           // overwrite
           current.antenna = i;
           current.delta = delta;
@@ -73,11 +79,76 @@ void maxdelta2(
         }
       } else { // not in set
         int delta = coverage.get_add_delta(data.antennas[i].base_stations);
-        if (delta > current.delta) {
+        if (delta > current.delta && find(
+              swap_blacklist.begin(), 
+              swap_blacklist.end(), 
+              i) == swap_blacklist.end()) {
           // overwrite
           current.antenna = i;
           current.delta = delta;
           current.add = true;
+        }
+      }
+    }
+    // NEXT ISN'T WORTH, CHECK FOR SWAPS
+    if (current.delta <= 0) {
+      // TEMPORARY ADD
+      Coverage copy = coverage;
+      if (current.add) {
+        set_antenna[current.antenna] = true; 
+        copy.add_coverage(data, current.antenna);
+      } else { // remove
+        set_antenna[current.antenna] = false; 
+        copy.remove_coverage(data, current.antenna);
+      }
+      // FIND SWAP
+      PQElement2 swap;
+      for(int i=0; i<set_antenna.size(); i++) {
+        if (set_antenna[i]) { // in set
+          int delta = copy.get_remove_delta(data.antennas[i].base_stations);
+          if (delta > swap.delta) {
+            // overwrite
+            swap.antenna = i;
+            swap.delta = delta;
+            swap.add = false;
+          }
+        } else { // not in set
+          int delta = copy.get_add_delta(data.antennas[i].base_stations);
+          if (delta > swap.delta) {
+            // overwrite
+            swap.antenna = i;
+            swap.delta = delta;
+            swap.add = true;
+          }
+        }
+      }
+      if (swap.delta + current.delta > 0) {
+        cout << "SWAP! delta: " << current.delta << " + " << swap.delta << endl;
+        cout << "antennas: " << current.antenna << " & " << swap.antenna << endl;
+        // ADD SWAP
+        if (swap.add) {
+          set_antenna[swap.antenna] = true; 
+          coverage.add_coverage(data, swap.antenna);
+        } else { // remove
+          set_antenna[swap.antenna] = false; 
+          coverage.remove_coverage(data, swap.antenna);
+        }
+        // FIX COVERAGE OF CURRENT
+        if (current.add) {
+          coverage.add_coverage(data, current.antenna);
+        } else { // remove
+          coverage.remove_coverage(data, current.antenna);
+        }
+        swap_blacklist.clear(); // should only clear when full, stop when no change btwn clears
+      } else {
+        swap_blacklist.push_back(current.antenna);
+        //cout << "blacklisted: " << current.antenna << " -- total size: " << swap_blacklist.size() << endl;
+        
+        // UNDO TEMPORARY ADD
+        if (current.add) {
+          set_antenna[current.antenna] = false; 
+        } else { // remove
+          set_antenna[current.antenna] = true; 
         }
       }
     }
