@@ -12,14 +12,20 @@ Greedy2:
         Profitable: calculate for this antenna |# of base stations in this that don't receive signal upon adding this|/|# of total base stations that this covers|.
                     Adding this is a profit if the division above is below 0.5. 
 
-Bottomup:
+BottomUp & BottomUp2:
   1. Start with an empty set of antennas.
   2. Create a priority queue on antennas that could be added. Sort to maximize the change that adding the antenna to current set would have on the coverage of the set.
   3. As long as antennas exist that would have a positive change on the set, pull antennas off the priority queue:
   4. For each antenna pulled, add to the antenna set, update the coverage, update a validity table, and re-add remaining antenna choices to the priority queue. (validity table is used to quickly determine when antenna-change pairs added to the priority queue are still valid, since changes change as other antennas are added.)
 
-Topdown:
+TopDown:
   1. Start with all antennas in the set.
   2. Create a priority queue on antennas that could be removed. Sort to maximize the change that adding the antenna to current set would have on the coverage of the set.
   3. As long as antennas exist that would have a positive change on the set, pull antennas off the priority queue:
-  4. For each antenna pulled, remove from the antenna set, update the coverage, update a validity table, and re-add remaining antenna choices to the priority queue. (validity table is used to quickly determine when antenna-change pairs added to the priority queue are still valid, since changes change as other antennas are added.)
+  4. For each antenna pulled, remove from the antenna set, update the coverage, update a validity table, and re-add remaining antenna choices to the priority queue. (validity table is used to quickly determine when antenna-change pairs added to the priority queue are still valid, since changes change as other antennas are removed.)
+
+MaxDelta: Essentially the child of BottomUp & TopDown
+  1. Start with an empty set of antennas.
+  2. Create a priority queue with an element for each antenna. The element is sorted by the change adding or removing that antenna from the set would have (add if the antenna is not in the set -- remove if the antenna is in the set).
+  3. As long as valid elements exist in the priority queue, pull elements off the priority queue.
+  4. For each element pulled, add/remove the antenna represented. Then update the coverage, update a validity table, and re-add all antennas that were affected by the current change. (validity table is used to quickly determine when antenna-change pairs added to the priority queue are still valid, since changes change as other antennas are added/removed)
