@@ -44,7 +44,7 @@ void topdown(
     
     // CHECK TIME
     double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
-    cout << elapsed_secs << endl;
+    //cout << elapsed_secs << endl;
     if (elapsed_secs > 10) {
       break;
     }
