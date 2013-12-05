@@ -38,10 +38,10 @@ void maxdelta(
   }
 
   // RUN
-  int iterations = 0;
+  //int iterations = 0;
   PQElement2 current;
   while(!pq.empty()) {   // TODO: force end when time runs out
-    ++iterations;
+    //++iterations;
     
     // CHECK TIME
     double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
@@ -78,7 +78,7 @@ void maxdelta(
     }
   }
   num_covered_base_stations = coverage.score;
-  cout << "num iterations: " << iterations << endl; 
+  //cout << "num iterations: " << iterations << endl; 
 }
 
 void maxdelta_int(

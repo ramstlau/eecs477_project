@@ -41,9 +41,9 @@ void maxdelta2(
   }
 
   // RUN
-  int iterations = 0;
+  //int iterations = 0;
   while(current.delta >= 0) {
-    ++iterations;
+    //++iterations;
     
     // CHECK TIME
     double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
@@ -61,23 +61,29 @@ void maxdelta2(
     }
 
     // GET NEXT
-    current = PQElement2();
+    current.delta = -1; // loop will break unless better delta is found.
     for(int i=0; i<set_antenna.size(); i++) {
       if (set_antenna[i]) { // in set
         int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
         if (delta > current.delta) {
-          current = PQElement2(i, delta, false); // add
+          // overwrite
+          current.antenna = i;
+          current.delta = delta;
+          current.add = false;
         }
       } else { // not in set
         int delta = coverage.get_add_delta(data.antennas[i].base_stations);
         if (delta > current.delta) {
-          current = PQElement2(i, delta, true); // add
+          // overwrite
+          current.antenna = i;
+          current.delta = delta;
+          current.add = true;
         }
       }
     }
   }
   num_covered_base_stations = coverage.score;
-  cout << "num iterations: " << iterations << endl;
+  //cout << "num iterations: " << iterations << endl;
 }
 
 void maxdelta2_int(
