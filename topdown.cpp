@@ -17,6 +17,7 @@ void topdown(
     int &num_covered_base_stations)
 {
   // Create PQ
+  clock_t algo_begin = clock();
   Max_PQ pq;
   int creation_stamper = 0;
   vector<int> validity_table(data.antennas.size(), creation_stamper);
@@ -28,8 +29,7 @@ void topdown(
   for(int i=0; i<set_antenna.size(); i++) {
     if (set_antenna[i]) {    // in antenna set
       int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
-      //cout << "adding to PQ: " << i << " -- delta: " << delta << endl;
-      if (delta > 0) {        // make sure it's worth adding
+      if (delta >= 0) {
         pq.emplace(i, delta, creation_stamper); 
       }
     }
@@ -41,6 +41,13 @@ void topdown(
   //cout << "initial score: " << coverage.score << endl;
   PQElement current;
   while(!pq.empty()) {   // TODO: force end when time runs out
+    
+    // CHECK TIME
+    double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
+    if (elapsed_secs > 10) {
+      break;
+    }
+    
     // GET NEXT
     current = pq.top();
     pq.pop();
@@ -64,7 +71,6 @@ void topdown(
       for(int i=0; i<set_antenna.size(); i++) {
         if (set_antenna[i]) {    // in antenna set
           int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
-          //cout << "adding to PQ: " << i << " -- delta: " << delta << endl;
           if (delta >= 0) {        // make sure it's worth adding
                                    // allow 0's, might open up new benefits
             pq.emplace(i, delta, creation_stamper); 

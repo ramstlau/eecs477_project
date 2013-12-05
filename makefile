@@ -7,7 +7,7 @@ CC = LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) g++
 CFLAGS= -Wall -Werror -std=c++11 -O3
 
 OBJS = input.o greedy1.o greedy2.o bottomup.o bottomup2.o topdown.o main.o
-DRIVER_OBJS = input.o greedy1.o greedy2.o bruteforce2.o bottomup.o bottomup2.o topdown.o driver.o
+DRIVER_OBJS = input.o greedy1.o greedy2.o bruteforce2.o bottomup.o bottomup2.o topdown.o maxdelta.o driver.o
 
 PROG = cover
 
@@ -48,6 +48,9 @@ bottomup2.o: input.h bottomup2.h bottomup2.cpp pq.h coverage.h
 
 topdown.o: input.h topdown.h topdown.cpp pq.h coverage.h
 				$(CC) $(CFLAGS) -c topdown.cpp
+
+maxdelta.o: input.h maxdelta.h maxdelta.cpp pq.h coverage.h
+				$(CC) $(CFLAGS) -c maxdelta.cpp
 
 driver.o: driver.cpp
 				$(CC) $(CFLAGS) -c driver.cpp

@@ -27,6 +27,7 @@ void bottomup(
 {
   //cout << "bottomup running" << endl;
   // Create PQ
+  clock_t algo_begin = clock();
   Max_PQ pq;
   int creation_stamper = 0;
   vector<int> validity_table(data.antennas.size(), creation_stamper);
@@ -52,11 +53,19 @@ void bottomup(
 
   // RUN
   //cout << "starting algo running" << endl;
-  PQElement current = pq.top();
-  pq.pop();
+  PQElement current;
   while(!pq.empty()) {   // TODO: force end when time runs out
+
+    // CHECK TIME
+    double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
+    if (elapsed_secs > 10) {
+      break;
+    }
+
+    // GET NEXT
+    current = pq.top();
+    pq.pop();
     
-    //cout << "found " << current.antenna << " -- validity: " << current.creation_stamp << " -- delta: " << current.delta << endl;
     if(current.is_valid(validity_table)) {
       // update set & increment creation_stamper
       creation_stamper++;
@@ -74,16 +83,11 @@ void bottomup(
       for(int i=0; i<set_antenna.size(); i++) {
         if (!set_antenna[i]) {    // not already in antenna set
           int delta = get_delta(src, data.antennas[i].base_stations, doubly_counted);
-          if (delta > 0) {        // make sure it's worth adding
+          if (delta >= 0) {        // make sure it's worth adding
             pq.emplace(i, delta, creation_stamper); 
           }
         }
       }
-    }
-    // GET NEXT
-    if (!pq.empty()) {
-      current = pq.top();
-      pq.pop();
     }
   }
   //cout << "done running" << endl;
@@ -112,7 +116,7 @@ void bottomup_int(
       set_antenna.push_back(i);
     }
   }
-  cout << endl;
+  //cout << endl;
 }
 
 void update_coverage(

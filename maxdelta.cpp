@@ -1,7 +1,6 @@
 #include "input.h"
 #include "pq.h"
-#include "bottomup2.h"
-#include "topdown.h"
+#include "maxdelta.h"
 #include "coverage.h"
 #include <iostream>
 #include <algorithm>
@@ -11,15 +10,15 @@
 
 using namespace std;
 
-void bottomup2(
+void maxdelta(
     HittingSetData &data, 
     vector<bool> &set_antenna, // continues from this set
     int &num_covered_base_stations)
 {
-  //cout << "bottomup2 running" << endl;
+  //cout << "maxdelta running" << endl;
   // Create PQ
   clock_t algo_begin = clock();
-  Max_PQ pq;
+  Max_PQ2 pq;
   int creation_stamper = 0;
   vector<int> validity_table(data.antennas.size(), creation_stamper);
 
@@ -27,15 +26,16 @@ void bottomup2(
   Coverage coverage(data, set_antenna);
 
   // Fill PQ
-  //cout << "filling pq" << endl;
   for(int i=0; i<set_antenna.size(); i++) {
-    //cout << i << endl;
-    if (!set_antenna[i]) {
+    if (!set_antenna[i]) { // not in set
       int delta = coverage.get_add_delta(data.antennas[i].base_stations);
-      //cout << delta << endl;
-      if (delta >= 0) {
-        //cout << "emplaced: " << i << " -- delta: " << delta << endl;
-        pq.emplace(i, delta, creation_stamper);
+      if (delta > 0) {
+        pq.emplace(i, delta, creation_stamper, true);
+      }
+    } else { // already in set
+      int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
+      if (delta > 0) { // 0's can open up new benefits
+        pq.emplace(i, delta, creation_stamper, false);
       }
     }
   }
@@ -44,24 +44,30 @@ void bottomup2(
 
   // RUN
   //cout << "starting algo running" << endl;
-  PQElement current;
+  PQElement2 current;
   while(!pq.empty()) {   // TODO: force end when time runs out
-
+    
     // CHECK TIME
     double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
     if (elapsed_secs > 10) {
       break;
     }
-
+    
     // GET NEXT
     current = pq.top();
     pq.pop();
     
+    //cout << "found " << current.antenna << " -- validity: " << current.creation_stamp << " -- delta: " << current.delta << endl;
     if(current.is_valid(validity_table)) {
       // update set & increment creation_stamper
       creation_stamper++;
-      set_antenna[current.antenna] = true; 
-      coverage.add_coverage(data, current.antenna);
+      if (current.add) {
+        set_antenna[current.antenna] = true; 
+        coverage.add_coverage(data, current.antenna);
+      } else { // remove
+        set_antenna[current.antenna] = false; 
+        coverage.remove_coverage(data, current.antenna);
+      }
       //cout << "new score: " << coverage.score << endl;
       // update validity table
       //cout << "updating validity table to " << creation_stamper << endl;
@@ -73,10 +79,15 @@ void bottomup2(
       }
       // re-add to PQ
       for(int i=0; i<set_antenna.size(); i++) {
-        if (!set_antenna[i]) {    // not already in antenna set
+        if (!set_antenna[i]) { // not in set
           int delta = coverage.get_add_delta(data.antennas[i].base_stations);
-          if (delta >= 0) {        // make sure it's worth adding
-            pq.emplace(i, delta, creation_stamper); 
+          if (delta >= 0) {
+            pq.emplace(i, delta, creation_stamper, true);
+          }
+        } else { // already in set
+          int delta = coverage.get_remove_delta(data.antennas[i].base_stations);
+          if (delta > 0) { // 0's can open up new benefits
+            pq.emplace(i, delta, creation_stamper, false);
           }
         }
       }
@@ -86,7 +97,7 @@ void bottomup2(
   num_covered_base_stations = coverage.score;
 }
 
-void bottomup2_int(
+void maxdelta_int(
     HittingSetData &data, 
     vector<int> &set_antenna, // continues from this set
     int &num_covered_base_stations)
@@ -99,7 +110,7 @@ void bottomup2_int(
   }
 
   // ALGO
-  bottomup2(data, converted, num_covered_base_stations);
+  maxdelta(data, converted, num_covered_base_stations);
 
   // BOOL -> INT
   set_antenna.clear();
