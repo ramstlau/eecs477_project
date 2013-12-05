@@ -8,6 +8,7 @@
 #include "maxdelta.h"
 #include "pq.h"
 #include "coverage.h"
+#include "validator.h"
 #include <iostream>
 #include <ctime>
 #include <utility>
@@ -81,6 +82,12 @@ void all_algos(HittingSetData &data, vector<int> &set_antenna, int &num_covered_
 
     algo_begin = clock(); 
     solver(data, set_antenna, num_covered_base_stations);
+    unsigned int score = num_covered_base_stations;
+    try {
+      validate(data, set_antenna, score);
+    } catch(...) {
+      cout << "VALIDATOR FAILED" << endl;
+    }
     algo_end = clock();
 
     print_time(algo_begin, algo_end, solver_name);

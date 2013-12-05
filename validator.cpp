@@ -50,8 +50,8 @@ void validate(HittingSetData &data, vector<int> &set_antennas, unsigned int &num
 	sort(oc.begin(), oc.end());
 	//for(unordered_set<int>::iterator it = onecovered_bs.begin(); it != onecovered_bs.end(); it++)*/
 	  
-	if(num_covered_base_stations != onecovered_bs.size())
-	  throw (unsigned int)onecovered_bs.size();
+  if(num_covered_base_stations != onecovered_bs.size())
+    throw (unsigned int)onecovered_bs.size();
 
 	//return oc;
 
