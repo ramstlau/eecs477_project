@@ -15,7 +15,6 @@
 #include <iostream>
 #include <ctime>
 #include <time.h>
-#include <cstdlib>
 #include <utility>
 
 typedef void (*Solver)(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations);

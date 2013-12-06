@@ -2,6 +2,7 @@
 #define _DRIVER_H_
 
 #include <vector>
+#include <cstdlib>
 
 using namespace std;
 
