@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
 
 	//try with topdown first
   	topdown_int_init(data, trial1.set_antenna, trial1.num_covered_base_stations, algo_begin);  
+  	trials.push_back(trial1);
   		
   	//try with maxdelta2
   	double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
