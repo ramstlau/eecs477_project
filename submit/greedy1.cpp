@@ -23,17 +23,17 @@ void printVector(vector<int> &v)
 }
 double profitable_calculate(HittingSetData &data, int setNum, vector<int> &covered, vector<int> &onecovered, vector<int> &dc, vector<int> &existingdc, vector<int> &adddc)
 {
-	//cout << "existingdc calculation begins: " << endl;
+
 	vector<int>::iterator it2 = set_intersection(dc.begin(), dc.end(), 
 			      data.antennas.at(setNum).base_stations.begin(), data.antennas.at(setNum).base_stations.end(),
 			      existingdc.begin());
  	existingdc.erase(it2, existingdc.end()); 
- 	//cout << "existingdc calculation ends, and addc calculation begins " << endl;
+
  	it2 = set_intersection(onecovered.begin(), onecovered.end(), 
 			       data.antennas.at(setNum).base_stations.begin(), data.antennas.at(setNum).base_stations.end(),
 			 				    adddc.begin());
  	adddc.erase(it2, adddc.end()); //this should be put into dc
- 	//cout << "addc calculation ends" << endl;
+
  	
  	double p = (double)(existingdc.size() + adddc.size())/(double)data.antennas.at(setNum).base_stations.size();
  	
@@ -42,7 +42,7 @@ double profitable_calculate(HittingSetData &data, int setNum, vector<int> &cover
 }
 void profitable_add(HittingSetData &data, int setNum, vector<int> &covered, vector<int> &onecovered, vector<int> &dc, vector<int> &existingdc, vector<int> &adddc)
 {
-		//update dc, TODO: this could alternatively be a push_back + for loop operation
+		//update dc
 		vector<int>newdc(data.num_base_stations);
 		vector<int>::iterator it2 = set_union(dc.begin(), dc.end(), adddc.begin(), adddc.end(), newdc.begin());
 		newdc.erase(it2, newdc.end());	
@@ -109,20 +109,13 @@ void greedy1(HittingSetData &data, vector<int> &set_antenna, int &num_covered_ba
 	
 	sort(sorted_range.begin(), sorted_range.end(), compare1);
 	
-	/*for(unsigned int i = 0; i < sorted_range.size(); i++)
-	  {
-	    cout << sorted_range.at(i)->num << " " << sorted_range.at(i)->base_stations.size() << endl;
-	  }
-	cout << endl;*/
 	
 	//select highest coverage.
 	
 	//covered = onecovered = selected.base_stations, dc = empty
 	set_antenna.push_back(sorted_range.at(0)->num);
 	vector<int> covered(sorted_range.at(0)->base_stations), onecovered(sorted_range.at(0)->base_stations), dc; 
-	//cout << "beginning: onecovered : ";
-	//printVector(onecovered);	
-	
+
 	//walk through sorted vector, add antennas if they are profitable
 	//	profitable: calculate add this antenna and |shinked data - newdc|/|data|.
 	//		    if over half of its base stations are uncovered*, 
@@ -134,8 +127,7 @@ void greedy1(HittingSetData &data, vector<int> &set_antenna, int &num_covered_ba
 	      set_antenna.push_back(sorted_range.at(i)->num);
 	  }
 	  
-	//cout << "after: onecovered : ";
-	//printVector(onecovered);
+
 	num_covered_base_stations = onecovered.size();
 
 }
