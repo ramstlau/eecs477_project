@@ -9,6 +9,7 @@
 #include "maxdelta.h"
 #include "maxdelta2.h"
 #include "maxdelta3.h"
+#include "simanneal.h"
 #include "pq.h"
 #include "coverage.h"
 #include "validator.h"
@@ -17,7 +18,7 @@
 #include <time.h>
 #include <utility>
 
-typedef void (*Solver)(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations);
+typedef void (*Solver)(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations, clock_t &algo_begin);
 
 void print_time(const clock_t &begin, const clock_t &end, string period_name);
 void single_algo(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations, Solver solver);
@@ -39,30 +40,31 @@ int main(int argc, char *argv[])
   print_time(input_begin, input_end, "Input"); 
 
   // RANDOMIZE THE SEED DATA
-  randomize_seed_data(data, set_antenna);
+  //randomize_seed_data(data, set_antenna);
 
   // SINGLE SOLVER
   //Solver solver = &greedy2;
   //Solver solver = &bottomup2_int;
   //Solver solver = &topdown_int_init;
   //Solver solver = &maxdelta3_int;
+  Solver solver = &simanneal_int;
   //Solver solver = &bruteforce2;
-  //single_algo(data, set_antenna, num_covered_base_stations, solver);
+  single_algo(data, set_antenna, num_covered_base_stations, solver);
   // PIPE OUTPUT FOR CONTINUATION
   //Solver solver2 = &maxdelta2_int;
   //single_algo(data, set_antenna, num_covered_base_stations, solver2);
 
   // MULTIPLE SOLVERS
-  vector<pair<string, Solver> > solvers;
+  //vector<pair<string, Solver> > solvers;
   //solvers.push_back(make_pair<string, Solver>("Greedy 1", &greedy1));
-  solvers.push_back(make_pair<string, Solver>("Greedy 2", &greedy2));
+  //solvers.push_back(make_pair<string, Solver>("Greedy 2", &greedy2));
   // bottomup is broken, don't include
-  solvers.push_back(make_pair<string, Solver>("Bottomup2", &bottomup2_int));
+  //solvers.push_back(make_pair<string, Solver>("Bottomup2", &bottomup2_int));
   //solvers.push_back(make_pair<string, Solver>("Topdown", &topdown_int_init));
-  solvers.push_back(make_pair<string, Solver>("Maxdelta", &maxdelta_int));
+  //solvers.push_back(make_pair<string, Solver>("Maxdelta", &maxdelta_int));
   //solvers.push_back(make_pair<string, Solver>("Maxdelta2", &maxdelta2_int));
-  solvers.push_back(make_pair<string, Solver>("Maxdelta3", &maxdelta3_int));
-  all_algos(data, set_antenna, num_covered_base_stations, solvers);
+  //solvers.push_back(make_pair<string, Solver>("Maxdelta3", &maxdelta3_int));
+  //all_algos(data, set_antenna, num_covered_base_stations, solvers);
   
   clock_t end = clock();
   print_time(begin, end, "Total Program"); 
@@ -72,7 +74,8 @@ int main(int argc, char *argv[])
 
 void single_algo(HittingSetData &data, vector<int> &set_antenna, int &num_covered_base_stations, Solver solver) {
 
-  solver(data, set_antenna, num_covered_base_stations);
+  clock_t algo_begin = clock();
+  solver(data, set_antenna, num_covered_base_stations, algo_begin);
 
   clock_t output_begin = clock();
   cout << set_antenna.size() << ' ';
@@ -93,7 +96,7 @@ void all_algos(HittingSetData &data, vector<int> &set_antenna, int &num_covered_
     Solver solver = p.second;
 
     algo_begin = clock(); 
-    solver(data, set_antenna_copy, num_covered_base_stations_copy);
+    solver(data, set_antenna_copy, num_covered_base_stations_copy, algo_begin);
     unsigned int score = num_covered_base_stations_copy;
     try {
       validate(data, set_antenna_copy, score);

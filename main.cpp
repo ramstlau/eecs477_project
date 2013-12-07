@@ -22,54 +22,58 @@ int main(int argc, char *argv[])
 	clock_t algo_begin = clock();
 	HittingSetData data;
 	data.readData();
+  vector<Trial> trials;
+
+  //try with topdown algorithm and full set as seed
+  Trial trial1;
+  topdown_int_init(data, trial1.set_antenna, trial1.num_covered_base_stations, algo_begin);  
+  trials.push_back(trial1);
+
+  //try with topdown algorithm and full set as seed
+  //Trial trial2;
+  //maxdelta2_int(data, trial2.set_antenna, trial2.num_covered_base_stations, algo_begin);  
+  //trials.push_back(trial2);
+    
+  //try with maxdelta2
+  //int iters = 0;
+  double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
+  while(elapsed_secs < 10)
+    {
+      Trial trialx;
+      //cout << ++iters << endl; 
+      
+      randomize_seed_data(data, trialx.set_antenna);  	
+      maxdelta2_int(data, trialx.set_antenna, trialx.num_covered_base_stations, algo_begin);
+      
+      trials.push_back(trialx);
+      
+      elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
+    }
   
-  	vector<Trial> trials;
-  	Trial trial1;
-
-	//try with topdown first
-  	topdown_int_init(data, trial1.set_antenna, trial1.num_covered_base_stations, algo_begin);  
-  	trials.push_back(trial1);
-  		
-  	//try with maxdelta2
-  	double elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
-  	while(elapsed_secs < 10)
-  	  {
-  	    Trial trialx;
-  	    
-  	    randomize_seed_data(data, trialx.set_antenna);  	
-  	    maxdelta2_int(data, trialx.set_antenna, trialx.num_covered_base_stations, algo_begin);
-  	    
-  	    trials.push_back(trialx);
-  	    
-  	    elapsed_secs = double(clock() - algo_begin) / CLOCKS_PER_SEC;
-  	  }
-  	
-
-  	
-  	//find maximum result
-  	int max_trial = -1;
-  	int max_bs_count = -1;
-  	
-  	for(unsigned int i = 0; i < trials.size(); i++)
-  	  {
-  	    //cout << "trial " << i << " : " << trials.at(i).num_covered_base_stations << endl;
-  	    if(trials.at(i).num_covered_base_stations > max_bs_count)
-  	      {
-  	        max_trial = i;
-  	        max_bs_count = trials.at(i).num_covered_base_stations;
-  	      }
-  	  
-  	  }
-  	
-  	vector<int> set_antenna;
-  	int num_covered_base_stations = trials.at(max_trial).num_covered_base_stations;
-  	set_antenna.swap(trials.at(max_trial).set_antenna);
-  	
-  	//finish
-  	cout << set_antenna.size() << ' ';
-  	printVector(set_antenna);
-  	cout << num_covered_base_stations << endl;
-  	//cout << "selected trial " << max_trial << " out of " << trials.size() << endl;
+  //find maximum result
+  int max_trial = -1;
+  int max_bs_count = -1;
+  
+  for(unsigned int i = 0; i < trials.size(); i++)
+    {
+      //cout << "trial " << i << " : " << trials.at(i).num_covered_base_stations << endl;
+      if(trials.at(i).num_covered_base_stations > max_bs_count)
+        {
+          max_trial = i;
+          max_bs_count = trials.at(i).num_covered_base_stations;
+        }
+    
+    }
+  
+  vector<int> set_antenna;
+  int num_covered_base_stations = trials.at(max_trial).num_covered_base_stations;
+  set_antenna.swap(trials.at(max_trial).set_antenna);
+  
+  //finish
+  cout << set_antenna.size() << ' ';
+  printVector(set_antenna);
+  cout << num_covered_base_stations << endl;
+  //cout << "selected trial " << max_trial << " out of " << trials.size() << endl;
 	
 	return 0;
 }

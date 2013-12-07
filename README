@@ -17,15 +17,50 @@ BottomUp & BottomUp2:
   2. Create a priority queue on antennas that could be added. Sort to maximize the change that adding the antenna to current set would have on the coverage of the set.
   3. As long as antennas exist that would have a positive change on the set, pull antennas off the priority queue:
   4. For each antenna pulled, add to the antenna set, update the coverage, update a validity table, and re-add remaining antenna choices to the priority queue. (validity table is used to quickly determine when antenna-change pairs added to the priority queue are still valid, since changes change as other antennas are added.)
+  5. Go back to 2.
 
 TopDown:
   1. Start with all antennas in the set.
   2. Create a priority queue on antennas that could be removed. Sort to maximize the change that adding the antenna to current set would have on the coverage of the set.
   3. As long as antennas exist that would have a positive change on the set, pull antennas off the priority queue:
   4. For each antenna pulled, remove from the antenna set, update the coverage, update a validity table, and re-add remaining antenna choices to the priority queue. (validity table is used to quickly determine when antenna-change pairs added to the priority queue are still valid, since changes change as other antennas are removed.)
+  5. Go back to 3.
 
 MaxDelta: Essentially the child of BottomUp & TopDown
   1. Start with an empty set of antennas.
   2. Create a priority queue with an element for each antenna. The element is sorted by the change adding or removing that antenna from the set would have (add if the antenna is not in the set -- remove if the antenna is in the set).
   3. As long as valid elements exist in the priority queue, pull elements off the priority queue.
   4. For each element pulled, add/remove the antenna represented. Then update the coverage, update a validity table, and re-add all antennas that were affected by the current change. (validity table is used to quickly determine when antenna-change pairs added to the priority queue are still valid, since changes change as other antennas are added/removed)
+  5. Go back to 2.
+
+MaxDelta2: I realized that Maxdelta was basically a local search, realized that we needed a way to get across local platueas (deltas of 0) and local maxima (added in swapping). Also, realized priority queue was no longer efficient with massive numbers of entries in the queue.
+  1. Continue the antenna set that is given (randomized to a given density)
+  2. Consider adding or removing each antenna. Keep the best potential change.
+  3. If the best change improves the exact coverage score, make the change.
+  4a. Else, no change improves the exact coverage score. Temporarily make the change, but look for an additional change that will make the pair of changes non-negative.
+  4b. If any 2-antenna swap improves the exact cover score, keep them. Else, undo the first change.
+  5. If the delta of the change was <= 0, add the first antenna to a blacklist.
+  6. Blacklisted antennas are ignored while looking for changes (to prevent undoing previous actions).
+  7. If the blacklist covers all antennas:
+  - if positive changes have been made since last time it filled, clear it, go back to 2
+  - else, end the algorithm
+
+Maxdelta3: Realized that selecting the best delta provided the best result, but that any swap was being accepted -- refactored to select the best swap for each iteration
+  1. Continue the antenna set that is given (randomized to a given density)
+  2. Consider adding or removing each antenna. Keep the best potential change.
+  3. If the best change improves the exact coverage score, make the change.
+  4a. Else, no change improves the exact coverage score. Temporarily make the change, but look for an additional change that will make the pair of changes non-negative.
+  4b. Select the BEST 2-antenna swap. If it's non-negative, make changes. Else, undo the temporary change.
+  5. If the delta of the change was <= 0, add the first antenna to a blacklist.
+  6. Blacklisted antennas are ignored while looking for changes (to prevent undoing previous actions).
+  7. If the blacklist covers all antennas:
+  - if positive changes have been made since last time it filled, clear it, go back to 2.
+  - else, end the algorithm
+
+Simulated Annealing: Since maxdelta approached the problem as a local search problem, we thought simulated anneal might be effective. Sadly, it was not.
+  1. Continue the antenna set that is given (randomized to a given density)
+  2. Consider adding or removing each antenna.
+  3. If the potential change improves the exact coverage score, make the change.
+  4. If the potential change does not improve the exact coverage score, compute a value based on the delta and how much time remains for the algorithm. If this value is sufficiently high (fairly low probability), then make the change. 
+  5. Repeat.
+
