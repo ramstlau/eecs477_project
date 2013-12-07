@@ -1,3 +1,9 @@
+We wrote a large number of different algorithms, each learning from previous attempts. This README explains how each algorithm works and how our approach progressed over the course of the project.
+
+Overall Approach:
+Maxdelta2 ended up performing best throughout our testing, in nearly every tests, and it finished with significant time to spare. Topdown performed very well on test1 however, due to the nature of that test data's characteristics. As a result, we chose to first run topdown, with a cutoff of .25 seconds (more than sufficient for test data that it performs well on). We then follow topdown with a series of runs of maxdelta2, storing to score of each iteration. When time becomes short, we select our best trial, and print this result.
+
+Algorithms:
 Greedy1:
   1. Sort antennas based on cardinality of base stations it covers (high -> low)
   2. Select the highest one
